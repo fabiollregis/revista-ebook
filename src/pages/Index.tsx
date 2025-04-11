@@ -1,7 +1,13 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Settings } from "lucide-react";
+import PwaInstallPrompt from "../components/PwaInstallPrompt";
 
 const Index = () => {
+  const [iframeUrl, setIframeUrl] = useState("https://heyzine.com/flip-book/dce36e099f.html");
+  const [iframeTitle, setIframeTitle] = useState("Venice Guide - Interactive Flipbook");
+
   useEffect(() => {
     // Registra o service worker para PWA
     if ('serviceWorker' in navigator) {
@@ -13,13 +19,23 @@ const Index = () => {
         });
       });
     }
+
+    // Carrega os valores do localStorage, se existirem
+    const savedUrl = localStorage.getItem("venice-iframe-url");
+    const savedTitle = localStorage.getItem("venice-iframe-title");
+    
+    if (savedUrl) setIframeUrl(savedUrl);
+    if (savedTitle) setIframeTitle(savedTitle);
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header className="bg-white shadow-sm py-4">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-center text-gray-800">Venice Guide</h1>
+          <Link to="/admin" className="text-gray-600 hover:text-gray-800">
+            <Settings size={20} />
+          </Link>
         </div>
       </header>
       
@@ -29,8 +45,8 @@ const Index = () => {
             allowFullScreen 
             scrolling="no" 
             className="w-full h-full" 
-            src="https://heyzine.com/flip-book/dce36e099f.html"
-            title="Venice Guide - Interactive Flipbook"
+            src={iframeUrl}
+            title={iframeTitle}
           ></iframe>
         </div>
         
@@ -46,6 +62,8 @@ const Index = () => {
           &copy; {new Date().getFullYear()} Venice Guide - Conteúdo interativo
         </div>
       </footer>
+
+      <PwaInstallPrompt />
     </div>
   );
 };
