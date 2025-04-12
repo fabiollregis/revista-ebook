@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Download, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -10,42 +11,55 @@ interface BeforeInstallPromptEvent extends Event {
 const PwaInstallPrompt = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
-    const handler = (e: Event) => {
+    // Store the install prompt event for later use
+    const promptHandler = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e as BeforeInstallPromptEvent);
-      setIsVisible(true);
     };
 
-    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("beforeinstallprompt", promptHandler);
 
-    // Verifica se já está instalado
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setIsVisible(false);
+    // Check if already installed as PWA
+    const isInStandaloneMode = () => 
+      window.matchMedia('(display-mode: standalone)').matches || 
+      (window.navigator as any).standalone ||
+      document.referrer.includes('android-app://');
+
+    // On mobile, show the prompt by default if not installed
+    if (isMobile && !isInStandaloneMode()) {
+      setIsVisible(true);
     }
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("beforeinstallprompt", promptHandler);
     };
-  }, []);
+  }, [isMobile]);
 
   const handleInstall = async () => {
-    if (!installPrompt) return;
-
-    await installPrompt.prompt();
-    const choiceResult = await installPrompt.userChoice;
-    
-    if (choiceResult.outcome === "accepted") {
-      console.log("Usuário aceitou a instalação");
+    if (installPrompt) {
+      // Use the stored event to show the install prompt
+      await installPrompt.prompt();
+      const choiceResult = await installPrompt.userChoice;
+      
+      if (choiceResult.outcome === "accepted") {
+        console.log("Usuário aceitou a instalação");
+      }
+      
+      setInstallPrompt(null);
     }
     
-    setInstallPrompt(null);
+    // Hide the prompt after installation attempt
     setIsVisible(false);
   };
 
   const handleDismiss = () => {
     setIsVisible(false);
+    // Store in localStorage that user dismissed the prompt
+    // to avoid showing it too frequently
+    localStorage.setItem("pwa-prompt-dismissed", "true");
   };
 
   if (!isVisible) return null;
