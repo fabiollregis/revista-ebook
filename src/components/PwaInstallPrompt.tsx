@@ -12,41 +12,59 @@ interface BeforeInstallPromptEvent extends Event {
 
 const PwaInstallPrompt = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isVisible, setIsVisible] = useState(true); // Always show initially
+  const [isVisible, setIsVisible] = useState(true);
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
   useEffect(() => {
     console.log("PwaInstallPrompt mounted");
     
-    // Function to check if already installed as PWA
+    // Função para verificar se já está instalado como PWA
     const isInStandaloneMode = () => 
       window.matchMedia('(display-mode: standalone)').matches || 
       (window.navigator as any).standalone ||
       document.referrer.includes('android-app://');
     
-    // If already in standalone mode, hide the prompt
+    // Se já estiver em modo standalone, oculta o prompt
     if (isInStandaloneMode()) {
       console.log("App is already installed as PWA, hiding prompt");
       setIsVisible(false);
       return;
     }
 
-    // Clear any previous dismissed state to ensure button shows
+    // Limpa qualquer estado anterior para garantir que o botão apareça
     localStorage.removeItem("pwa-prompt-dismissed");
 
-    // Store the install prompt event for later use
+    // Tenta iniciar a instalação automaticamente após carregar a página
+    const tryAutoInstall = () => {
+      if ('serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window) {
+        // Simula o clique no botão de instalação após 3 segundos
+        setTimeout(() => {
+          if (installPrompt) {
+            console.log("Iniciando instalação automática");
+            handleInstall();
+          }
+        }, 3000);
+      }
+    };
+
+    // Armazena o evento de prompt de instalação para uso posterior
     const promptHandler = (e: Event) => {
       e.preventDefault();
       console.log("beforeinstallprompt event captured", e);
       setInstallPrompt(e as BeforeInstallPromptEvent);
       setIsVisible(true);
+      
+      // Tenta iniciar a instalação automaticamente após capturar o evento
+      setTimeout(() => {
+        handleInstall();
+      }, 1500);
     };
 
-    // Listen for the beforeinstallprompt event
+    // Escuta pelo evento beforeinstallprompt
     window.addEventListener("beforeinstallprompt", promptHandler);
     
-    // Listen for appinstalled event
+    // Escuta pelo evento appinstalled
     window.addEventListener("appinstalled", () => {
       console.log("PWA was installed");
       setIsVisible(false);
@@ -57,10 +75,14 @@ const PwaInstallPrompt = () => {
       });
     });
 
+    // Tenta a instalação automática após o carregamento da página
+    window.addEventListener('load', tryAutoInstall);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", promptHandler);
+      window.removeEventListener('load', tryAutoInstall);
     };
-  }, [toast]);
+  }, [toast, installPrompt]);
 
   const handleInstall = async () => {
     console.log("Install button clicked, prompt:", installPrompt);
@@ -68,10 +90,10 @@ const PwaInstallPrompt = () => {
     if (installPrompt) {
       try {
         console.log("Attempting to show installation prompt");
-        // Show the install prompt
+        // Mostra o prompt de instalação
         await installPrompt.prompt();
         
-        // Wait for the user's choice
+        // Aguarda a escolha do usuário
         const choiceResult = await installPrompt.userChoice;
         
         console.log('Installation result:', choiceResult.outcome);
@@ -83,9 +105,9 @@ const PwaInstallPrompt = () => {
             description: "O Venice Guide está sendo instalado",
           });
           
-          // Hide the prompt after installation
+          // Oculta o prompt após a instalação
           setIsVisible(false);
-          // Clear the installation prompt
+          // Limpa o prompt de instalação
           setInstallPrompt(null);
         } else {
           console.log("User declined the installation");
@@ -104,40 +126,50 @@ const PwaInstallPrompt = () => {
   };
 
   const handleManualInstall = () => {
-    // Detect iOS
+    // Detecta iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
     
     if (isIOS) {
+      // No iOS, força a exibição do banner de instalação nativo
+      // Cria um elemento invisível para forçar a interação do usuário
+      const dummyButton = document.createElement('button');
+      dummyButton.style.position = 'fixed';
+      dummyButton.style.opacity = '0';
+      dummyButton.style.pointerEvents = 'none';
+      document.body.appendChild(dummyButton);
+      dummyButton.click();
+      
+      // Remove após um pequeno atraso
+      setTimeout(() => {
+        document.body.removeChild(dummyButton);
+      }, 100);
+      
       toast({
         title: "Instalação no iOS",
         description: "Toque no ícone de compartilhamento e depois em 'Adicionar à Tela de Início'",
       });
-    } else {
-      // Try to simulate installation on Android
-      // This is a workaround since some browsers might not trigger the beforeinstallprompt event
+    } else if (isAndroid) {
+      // No Android, tenta forçar o banner de instalação
       const manifestLink = document.querySelector('link[rel="manifest"]');
       
       if (manifestLink) {
-        // Force manifest parsing to trigger installation
+        // Força a análise do manifesto para acionar a instalação
         const manifestURL = manifestLink.getAttribute("href");
         if (manifestURL) {
           console.log("Attempting to trigger installation via manifest:", manifestURL);
           
-          // Create an invisible frame to load the manifest
-          const iframe = document.createElement("iframe");
-          iframe.style.display = "none";
-          iframe.src = manifestURL;
-          document.body.appendChild(iframe);
-          
-          // Remove after a short delay
+          // Refresh no manifesto para forçar reavaliação
+          const currentHref = manifestLink.getAttribute("href");
+          manifestLink.setAttribute("href", "about:blank");
           setTimeout(() => {
-            document.body.removeChild(iframe);
-            
-            toast({
-              title: "Instalação manual necessária",
-              description: "Use o menu do navegador para instalar o aplicativo",
-            });
-          }, 500);
+            manifestLink.setAttribute("href", currentHref || "/manifest.json");
+          }, 10);
+          
+          toast({
+            title: "Instalando automaticamente",
+            description: "Aguarde enquanto instalamos o aplicativo...",
+          });
         }
       } else {
         toast({
@@ -145,13 +177,19 @@ const PwaInstallPrompt = () => {
           description: "Use o menu do navegador para instalar o aplicativo",
         });
       }
+    } else {
+      // Para outros dispositivos
+      toast({
+        title: "Instalação manual",
+        description: "Use o menu do navegador (três pontos) e selecione 'Instalar aplicativo'",
+      });
     }
   };
 
   const handleDismiss = () => {
     console.log("Dismissing prompt");
     setIsVisible(false);
-    // Store in localStorage that user dismissed the prompt
+    // Armazena no localStorage que o usuário dispensou o prompt
     localStorage.setItem("pwa-prompt-dismissed", "true");
   };
 

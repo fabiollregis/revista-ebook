@@ -1,7 +1,7 @@
 
 // Service Worker para o Venice Guide PWA
 
-const CACHE_NAME = 'venice-guide-v4';
+const CACHE_NAME = 'venice-guide-v5';
 
 // Arquivos que serão cacheados
 const urlsToCache = [
@@ -17,7 +17,7 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
   
-  // Skip waiting forces the waiting service worker to become the active service worker
+  // Skip waiting força o service worker a se tornar ativo imediatamente
   self.skipWaiting();
   
   event.waitUntil(
@@ -35,7 +35,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   console.log('Service Worker: Activated');
   
-  // Claim immediately controls all clients under service worker's scope
+  // Claim controla todos os clientes imediatamente
   event.waitUntil(clients.claim());
   
   const cacheWhitelist = [CACHE_NAME];
@@ -52,6 +52,13 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  
+  // Notifica todos os clientes que o service worker foi atualizado
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({ type: 'SW_ACTIVATED' });
+    });
+  });
 });
 
 // Estratégia de cache: stale-while-revalidate
@@ -112,4 +119,68 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+  
+  if (event.data && event.data.type === 'CHECK_FOR_UPDATE') {
+    // Força verificação de atualização
+    self.registration.update();
+  }
+  
+  if (event.data && event.data.type === 'TRIGGER_INSTALL') {
+    // Notifica todos os clientes para mostrar o prompt de instalação
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({ type: 'SHOW_INSTALL_PROMPT' });
+      });
+    });
+  }
+});
+
+// Evento "push" para notificações push
+self.addEventListener('push', (event) => {
+  let notificationData = {
+    title: 'Venice Guide',
+    body: 'Novas atualizações disponíveis!',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-192x192.png'
+  };
+
+  if (event.data) {
+    try {
+      notificationData = event.data.json();
+    } catch (e) {
+      // Se não for JSON, use o texto
+      notificationData.body = event.data.text();
+    }
+  }
+
+  const showNotification = self.registration.showNotification(
+    notificationData.title,
+    {
+      body: notificationData.body,
+      icon: notificationData.icon,
+      badge: notificationData.badge
+    }
+  );
+
+  event.waitUntil(showNotification);
+});
+
+// Evento quando o usuário clica em uma notificação
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then(clientList => {
+      // Se já tiver uma janela aberta, foco nela
+      for (const client of clientList) {
+        if (client.url === '/' && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Se não tiver, abra uma nova
+      if (self.clients.openWindow) {
+        return self.clients.openWindow('/');
+      }
+    })
+  );
 });

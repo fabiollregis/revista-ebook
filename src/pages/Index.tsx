@@ -41,6 +41,14 @@ const Index = () => {
               }
             });
           });
+
+          // Após 2 segundos, tenta iniciar uma instalação automática
+          setTimeout(() => {
+            if (registration.active) {
+              registration.active.postMessage({ type: 'TRIGGER_INSTALL' });
+            }
+          }, 2000);
+          
         } catch (error) {
           console.error('Falha ao registrar o Service Worker:', error);
           toast({
@@ -48,6 +56,23 @@ const Index = () => {
             title: "Erro no PWA",
             description: "Não foi possível registrar o aplicativo para uso offline",
           });
+        }
+      });
+      
+      // Configuração para receber mensagens do service worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'SHOW_INSTALL_PROMPT') {
+          console.log('Recebida mensagem para mostrar prompt de instalação');
+          // Simula um clique no botão de instalação
+          const installButton = document.querySelector('[data-install-button]');
+          if (installButton) {
+            (installButton as HTMLButtonElement).click();
+          }
+        }
+        
+        if (event.data && event.data.type === 'SW_ACTIVATED') {
+          console.log('Service worker ativado, atualizando para conteúdo fresco');
+          window.location.reload();
         }
       });
       
@@ -59,6 +84,21 @@ const Index = () => {
     } else {
       console.log("Service workers not supported in this browser");
     }
+
+    // Tentar automaticamente mostrar o prompt de instalação
+    const triggerInstall = () => {
+      // Se houver um evento deferredPrompt armazenado, usá-lo
+      if ((window as any).deferredPrompt) {
+        console.log('Tentando mostrar prompt de instalação automático');
+        const installButton = document.querySelector('[data-install-button]');
+        if (installButton) {
+          (installButton as HTMLButtonElement).click();
+        }
+      }
+    };
+
+    // Tenta a instalação automática após um tempo
+    setTimeout(triggerInstall, 3000);
 
     // Carrega os valores do localStorage, se existirem
     const savedUrl = localStorage.getItem("venice-iframe-url");
