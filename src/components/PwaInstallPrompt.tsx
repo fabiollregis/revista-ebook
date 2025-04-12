@@ -12,39 +12,45 @@ interface BeforeInstallPromptEvent extends Event {
 
 const PwaInstallPrompt = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true); // Set to true by default to always show initially
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("PwaInstallPrompt mounted");
+    
     // Function to check if already installed as PWA
     const isInStandaloneMode = () => 
       window.matchMedia('(display-mode: standalone)').matches || 
       (window.navigator as any).standalone ||
       document.referrer.includes('android-app://');
+    
+    // If already in standalone mode, hide the prompt
+    if (isInStandaloneMode()) {
+      console.log("App is already installed as PWA, hiding prompt");
+      setIsVisible(false);
+      return;
+    }
 
     // Store the install prompt event for later use
     const promptHandler = (e: Event) => {
       e.preventDefault();
       console.log("beforeinstallprompt event captured");
       setInstallPrompt(e as BeforeInstallPromptEvent);
-      
-      // If on mobile and not in standalone mode, show the prompt
-      if (isMobile && !isInStandaloneMode()) {
-        setIsVisible(true);
-      }
+      setIsVisible(true);
     };
 
-    // If the user has previously dismissed the prompt, don't show it again
-    const hasDismissed = localStorage.getItem("pwa-prompt-dismissed") === "true";
+    // Listen for the beforeinstallprompt event
+    window.addEventListener("beforeinstallprompt", promptHandler);
     
-    if (!hasDismissed && isMobile && !isInStandaloneMode()) {
-      setIsVisible(true);
+    // Check if the user has previously dismissed the prompt
+    const hasDismissed = localStorage.getItem("pwa-prompt-dismissed") === "true";
+    if (hasDismissed) {
+      console.log("User previously dismissed the prompt");
+      setIsVisible(false);
     }
 
-    window.addEventListener("beforeinstallprompt", promptHandler);
-
-    // Also listen for appinstalled event to hide the prompt if installation succeeds
+    // Listen for appinstalled event
     window.addEventListener("appinstalled", () => {
       console.log("PWA was installed");
       setIsVisible(false);
@@ -62,6 +68,8 @@ const PwaInstallPrompt = () => {
   }, [isMobile, toast]);
 
   const handleInstall = async () => {
+    console.log("Install button clicked, prompt:", installPrompt);
+    
     if (installPrompt) {
       try {
         console.log("Attempting to show installation prompt");
@@ -110,22 +118,29 @@ const PwaInstallPrompt = () => {
           description: "Toque no ícone de compartilhamento e depois em 'Adicionar à Tela de Início'",
         });
       } else {
-        // Try to trigger the installation manually for other browsers
+        // For other browsers without the installPrompt event
         toast({
-          title: "Instalação não disponível",
-          description: "Este navegador não suporta instalação automática de PWA",
+          title: "Instalação manual",
+          description: "Usando o menu do navegador, selecione 'Instalar aplicativo' ou 'Adicionar à tela inicial'",
         });
       }
     }
   };
 
   const handleDismiss = () => {
+    console.log("Dismissing prompt");
     setIsVisible(false);
     // Store in localStorage that user dismissed the prompt
     localStorage.setItem("pwa-prompt-dismissed", "true");
   };
 
-  if (!isVisible) return null;
+  // Debug info
+  console.log("PwaInstallPrompt render state:", { isVisible, isMobile, hasInstallPrompt: !!installPrompt });
+
+  if (!isVisible) {
+    console.log("Prompt not visible, returning null");
+    return null;
+  }
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white rounded-lg shadow-lg p-4 z-50 border border-gray-200">

@@ -15,6 +15,7 @@ const Index = () => {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async () => {
         try {
+          console.log("Attempting to register service worker");
           const registration = await navigator.serviceWorker.register('/sw.js');
           console.log('Service Worker registrado com sucesso:', registration.scope);
           
@@ -36,6 +37,8 @@ const Index = () => {
           console.error('Falha ao registrar o Service Worker:', error);
         }
       });
+    } else {
+      console.log("Service workers not supported in this browser");
     }
 
     // Carrega os valores do localStorage, se existirem
@@ -81,6 +84,7 @@ const Index = () => {
         </div>
       </footer>
 
+      {/* Always render the component - the component itself will handle visibility internally */}
       <PwaInstallPrompt />
     </div>
   );

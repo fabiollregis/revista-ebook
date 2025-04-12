@@ -1,7 +1,7 @@
 
 // Service Worker para o Venice Guide PWA
 
-const CACHE_NAME = 'venice-guide-v2';
+const CACHE_NAME = 'venice-guide-v3';
 
 // Arquivos que serão cacheados
 const urlsToCache = [
@@ -27,6 +27,7 @@ self.addEventListener('install', (event) => {
         return cache.addAll(urlsToCache);
       })
       .then(() => console.log('Service Worker: All files cached'))
+      .catch(error => console.error('Service Worker: Cache failed', error))
   );
 });
 
@@ -43,9 +44,10 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log('Service Worker: Clearing Old Cache');
+            console.log('Service Worker: Clearing Old Cache', cacheName);
             return caches.delete(cacheName);
           }
+          return Promise.resolve();
         })
       );
     })
