@@ -8,6 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 const Index = () => {
   const [iframeUrl, setIframeUrl] = useState("https://heyzine.com/flip-book/dce36e099f.html");
   const [iframeTitle, setIframeTitle] = useState("Venice Guide - Interactive Flipbook");
+  const [siteTitle, setSiteTitle] = useState("Venice Guide");
+  const [footerText, setFooterText] = useState("Conteúdo interativo");
+  const [infoText, setInfoText] = useState("Guia interativo de Veneza - Instale como aplicativo para acesso offline");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -103,16 +106,22 @@ const Index = () => {
     // Carrega os valores do localStorage, se existirem
     const savedUrl = localStorage.getItem("venice-iframe-url");
     const savedTitle = localStorage.getItem("venice-iframe-title");
+    const savedSiteTitle = localStorage.getItem("venice-site-title");
+    const savedFooterText = localStorage.getItem("venice-footer-text");
+    const savedInfoText = localStorage.getItem("venice-info-text");
     
     if (savedUrl) setIframeUrl(savedUrl);
     if (savedTitle) setIframeTitle(savedTitle);
+    if (savedSiteTitle) setSiteTitle(savedSiteTitle);
+    if (savedFooterText) setFooterText(savedFooterText);
+    if (savedInfoText) setInfoText(savedInfoText);
   }, [toast]);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-center text-gray-800">Venice Guide</h1>
+          <h1 className="text-2xl font-semibold text-center text-gray-800">{siteTitle}</h1>
           <Link to="/admin" className="text-gray-600 hover:text-gray-800">
             <Settings size={20} />
           </Link>
@@ -132,14 +141,14 @@ const Index = () => {
         
         <div className="mt-6 text-center">
           <p className="text-gray-600 text-sm">
-            Guia interativo de Veneza - Instale como aplicativo para acesso offline
+            {infoText}
           </p>
         </div>
       </main>
       
       <footer className="bg-white py-4">
         <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} Venice Guide - Conteúdo interativo
+          &copy; {new Date().getFullYear()} Venice Guide - {footerText}
         </div>
       </footer>
 

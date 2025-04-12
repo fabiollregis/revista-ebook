@@ -13,11 +13,25 @@ interface BeforeInstallPromptEvent extends Event {
 const PwaInstallPrompt = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(true);
+  const [promptTitle, setPromptTitle] = useState("Instale o Venice Guide");
+  const [promptDescription, setPromptDescription] = useState(
+    "Instale este aplicativo para acessar o guia de Veneza offline e ter uma experiência melhor."
+  );
+  const [buttonText, setButtonText] = useState("Instalar Aplicativo");
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
   useEffect(() => {
     console.log("PwaInstallPrompt mounted");
+    
+    // Carregar textos do localStorage
+    const savedPromptTitle = localStorage.getItem("venice-install-prompt-title");
+    const savedPromptDescription = localStorage.getItem("venice-install-prompt-description");
+    const savedButtonText = localStorage.getItem("venice-install-button-text");
+    
+    if (savedPromptTitle) setPromptTitle(savedPromptTitle);
+    if (savedPromptDescription) setPromptDescription(savedPromptDescription);
+    if (savedButtonText) setButtonText(savedButtonText);
     
     // Função para verificar se já está instalado como PWA
     const isInStandaloneMode = () => 
@@ -204,20 +218,21 @@ const PwaInstallPrompt = () => {
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white rounded-lg shadow-lg p-4 z-50 border border-gray-200">
       <div className="flex justify-between items-start mb-2">
-        <h3 className="font-semibold text-gray-800">Instale o Venice Guide</h3>
+        <h3 className="font-semibold text-gray-800">{promptTitle}</h3>
         <button onClick={handleDismiss} className="text-gray-500 hover:text-gray-700">
           <X size={18} />
         </button>
       </div>
       <p className="text-sm text-gray-600 mb-3">
-        Instale este aplicativo para acessar o guia de Veneza offline e ter uma experiência melhor.
+        {promptDescription}
       </p>
       <Button
         onClick={handleInstall}
         className="w-full flex items-center justify-center gap-2"
+        data-install-button
       >
         <Download size={18} />
-        <span>Instalar Aplicativo</span>
+        <span>{buttonText}</span>
       </Button>
     </div>
   );
