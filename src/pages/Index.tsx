@@ -2,10 +2,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import PwaInstallPrompt from "../components/PwaInstallPrompt";
+import { getPages } from "@/utils/local-storage";
+import { PageData } from "@/types/page";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const [pages, setPages] = useState<PageData[]>([]);
   const [iframeUrl, setIframeUrl] = useState("https://heyzine.com/flip-book/dce36e099f.html");
   const [iframeTitle, setIframeTitle] = useState("Venice Guide - Interactive Flipbook");
   const [siteTitle, setSiteTitle] = useState("Venice Guide");
@@ -88,20 +92,8 @@ const Index = () => {
       console.log("Service workers not supported in this browser");
     }
 
-    // Tentar automaticamente mostrar o prompt de instalação
-    const triggerInstall = () => {
-      // Se houver um evento deferredPrompt armazenado, usá-lo
-      if ((window as any).deferredPrompt) {
-        console.log('Tentando mostrar prompt de instalação automático');
-        const installButton = document.querySelector('[data-install-button]');
-        if (installButton) {
-          (installButton as HTMLButtonElement).click();
-        }
-      }
-    };
-
-    // Tenta a instalação automática após um tempo
-    setTimeout(triggerInstall, 3000);
+    // Carrega as páginas do localStorage
+    setPages(getPages());
 
     // Carrega os valores do localStorage, se existirem
     const savedUrl = localStorage.getItem("venice-iframe-url");
@@ -122,33 +114,72 @@ const Index = () => {
       <header className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-center text-gray-800">{siteTitle}</h1>
-          <Link to="/admin" className="text-gray-600 hover:text-gray-800">
+          <Link to="/dashboard" className="text-gray-600 hover:text-gray-800">
             <Settings size={20} />
           </Link>
         </div>
       </header>
       
-      <main className="flex-grow flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-6xl h-[600px] md:h-[650px] lg:h-[700px] rounded-lg overflow-hidden shadow-lg">
-          <iframe 
-            allowFullScreen 
-            scrolling="no" 
-            className="w-full h-full" 
-            src={iframeUrl}
-            title={iframeTitle}
-          ></iframe>
-        </div>
-        
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm">
-            {infoText}
-          </p>
-        </div>
+      <main className="flex-grow flex flex-col items-center p-4">
+        {pages.length > 0 ? (
+          <div className="container mx-auto px-4 py-8">
+            <h2 className="text-xl font-semibold mb-6">Páginas Disponíveis</h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {pages.map(page => (
+                <Link 
+                  key={page.id} 
+                  to={`/page/${page.slug}`}
+                  className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                >
+                  <div className="p-4 border-t">
+                    <h3 className="font-medium text-lg mb-1">{page.title}</h3>
+                    {page.description && (
+                      <p className="text-gray-600 text-sm line-clamp-2">{page.description}</p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+            
+            <div className="mt-8 text-center">
+              <Link to="/dashboard">
+                <Button>
+                  Gerenciar Páginas
+                </Button>
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="w-full max-w-6xl h-[600px] md:h-[650px] lg:h-[700px] rounded-lg overflow-hidden shadow-lg">
+              <iframe 
+                allowFullScreen 
+                scrolling="no" 
+                className="w-full h-full" 
+                src={iframeUrl}
+                title={iframeTitle}
+              ></iframe>
+            </div>
+            
+            <div className="mt-6 text-center">
+              <p className="text-gray-600 text-sm mb-4">
+                {infoText}
+              </p>
+              
+              <Link to="/dashboard">
+                <Button>
+                  Criar Páginas com Iframes
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
       </main>
       
       <footer className="bg-white py-4">
         <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} Venice Guide - {footerText}
+          &copy; {new Date().getFullYear()} {siteTitle} - {footerText}
         </div>
       </footer>
 
