@@ -20,12 +20,12 @@ const PageView = () => {
       setPage(foundPage || null);
       
       if (foundPage) {
-        // Atualiza o título da página
+        // Update the page title
         document.title = `${foundPage.title} | Venice Guide`;
       }
     }
     
-    // Carrega configurações do site
+    // Load site configuration
     const config = loadSiteConfig();
     setSiteTitle(config.siteTitle);
     setFooterText(config.footerText);
@@ -63,7 +63,7 @@ const PageView = () => {
         </div>
       </header>
       
-      <main className="flex-grow flex flex-col items-center justify-center p-4">
+      <main className="flex-grow flex flex-col items-center p-4">
         <div className="w-full max-w-6xl h-[600px] md:h-[650px] lg:h-[700px] rounded-lg overflow-hidden shadow-lg">
           <iframe 
             allowFullScreen 
@@ -76,7 +76,7 @@ const PageView = () => {
         
         {page.description && (
           <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-600 text-sm mb-4">
               {page.description}
             </p>
           </div>
@@ -89,7 +89,7 @@ const PageView = () => {
         </div>
       </footer>
 
-      {/* Prompt de instalação do PWA */}
+      {/* PWA installation prompt */}
       <PwaInstallPrompt />
     </div>
   );
