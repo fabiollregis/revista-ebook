@@ -66,6 +66,11 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const savedInfoText = localStorage.getItem("venice-info-text") || 
       "Guia interativo de Veneza - Instale como aplicativo para acesso offline";
     
+    // Set default admin password if not set
+    if (!localStorage.getItem("venice-admin-password")) {
+      localStorage.setItem("venice-admin-password", "15183020");
+    }
+    
     setIframeUrl(savedUrl);
     setIframeTitle(savedTitle);
     setSiteTitle(savedSiteTitle);
