@@ -18,9 +18,11 @@ const PwaInstallPrompt = () => {
     const promptHandler = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e as BeforeInstallPromptEvent);
+      // Se estiver no celular e não estiver em modo standalone, mostra o prompt
+      if (isMobile && !isInStandaloneMode()) {
+        setIsVisible(true);
+      }
     };
-
-    window.addEventListener("beforeinstallprompt", promptHandler);
 
     // Check if already installed as PWA
     const isInStandaloneMode = () => 
@@ -28,9 +30,14 @@ const PwaInstallPrompt = () => {
       (window.navigator as any).standalone ||
       document.referrer.includes('android-app://');
 
-    // On mobile, show the prompt by default if not installed
-    if (isMobile && !isInStandaloneMode()) {
-      setIsVisible(true);
+    window.addEventListener("beforeinstallprompt", promptHandler);
+
+    // On mobile, we'll handle the visibility based on installation status
+    if (isMobile) {
+      // Se não estiver em modo standalone, mostra o prompt
+      if (!isInStandaloneMode()) {
+        setIsVisible(true);
+      }
     }
 
     return () => {
@@ -40,25 +47,41 @@ const PwaInstallPrompt = () => {
 
   const handleInstall = async () => {
     if (installPrompt) {
-      // Use the stored event to show the install prompt
-      await installPrompt.prompt();
-      const choiceResult = await installPrompt.userChoice;
-      
-      if (choiceResult.outcome === "accepted") {
-        console.log("Usuário aceitou a instalação");
+      try {
+        // Força o prompt a ser mostrado automaticamente
+        await installPrompt.prompt();
+        
+        // Aguarda a escolha do usuário
+        const choiceResult = await installPrompt.userChoice;
+        
+        console.log('Resultado da instalação:', choiceResult.outcome);
+        
+        if (choiceResult.outcome === "accepted") {
+          console.log("Usuário aceitou a instalação");
+          // Esconde o prompt após a instalação
+          setIsVisible(false);
+          // Limpa o evento de prompt
+          setInstallPrompt(null);
+        } else {
+          console.log("Usuário recusou a instalação");
+        }
+      } catch (error) {
+        console.error("Erro ao tentar instalar o PWA:", error);
       }
+    } else {
+      console.log("Nenhum evento de instalação disponível");
       
-      setInstallPrompt(null);
+      // Se estamos em iOS, mostramos instruções específicas
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) {
+        alert("Para instalar este app no iOS: toque no ícone de compartilhamento e depois em 'Adicionar à Tela de Início'");
+      }
     }
-    
-    // Hide the prompt after installation attempt
-    setIsVisible(false);
   };
 
   const handleDismiss = () => {
     setIsVisible(false);
     // Store in localStorage that user dismissed the prompt
-    // to avoid showing it too frequently
     localStorage.setItem("pwa-prompt-dismissed", "true");
   };
 
