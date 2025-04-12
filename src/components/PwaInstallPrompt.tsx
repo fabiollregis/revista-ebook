@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { Download, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -12,69 +14,107 @@ const PwaInstallPrompt = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const isMobile = useIsMobile();
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Store the install prompt event for later use
-    const promptHandler = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e as BeforeInstallPromptEvent);
-      // Se estiver no celular e não estiver em modo standalone, mostra o prompt
-      if (isMobile && !isInStandaloneMode()) {
-        setIsVisible(true);
-      }
-    };
-
-    // Check if already installed as PWA
+    // Function to check if already installed as PWA
     const isInStandaloneMode = () => 
       window.matchMedia('(display-mode: standalone)').matches || 
       (window.navigator as any).standalone ||
       document.referrer.includes('android-app://');
 
-    window.addEventListener("beforeinstallprompt", promptHandler);
-
-    // On mobile, we'll handle the visibility based on installation status
-    if (isMobile) {
-      // Se não estiver em modo standalone, mostra o prompt
-      if (!isInStandaloneMode()) {
+    // Store the install prompt event for later use
+    const promptHandler = (e: Event) => {
+      e.preventDefault();
+      console.log("beforeinstallprompt event captured");
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+      
+      // If on mobile and not in standalone mode, show the prompt
+      if (isMobile && !isInStandaloneMode()) {
         setIsVisible(true);
       }
+    };
+
+    // If the user has previously dismissed the prompt, don't show it again
+    const hasDismissed = localStorage.getItem("pwa-prompt-dismissed") === "true";
+    
+    if (!hasDismissed && isMobile && !isInStandaloneMode()) {
+      setIsVisible(true);
     }
+
+    window.addEventListener("beforeinstallprompt", promptHandler);
+
+    // Also listen for appinstalled event to hide the prompt if installation succeeds
+    window.addEventListener("appinstalled", () => {
+      console.log("PWA was installed");
+      setIsVisible(false);
+      setInstallPrompt(null);
+      toast({
+        title: "Aplicativo instalado",
+        description: "O Venice Guide foi instalado com sucesso!",
+      });
+    });
 
     return () => {
       window.removeEventListener("beforeinstallprompt", promptHandler);
+      window.removeEventListener("appinstalled", () => {});
     };
-  }, [isMobile]);
+  }, [isMobile, toast]);
 
   const handleInstall = async () => {
     if (installPrompt) {
       try {
-        // Força o prompt a ser mostrado automaticamente
+        console.log("Attempting to show installation prompt");
+        // Show the install prompt
         await installPrompt.prompt();
         
-        // Aguarda a escolha do usuário
+        // Wait for the user's choice
         const choiceResult = await installPrompt.userChoice;
         
-        console.log('Resultado da instalação:', choiceResult.outcome);
+        console.log('Installation result:', choiceResult.outcome);
         
         if (choiceResult.outcome === "accepted") {
-          console.log("Usuário aceitou a instalação");
-          // Esconde o prompt após a instalação
+          console.log("User accepted the installation");
+          toast({
+            title: "Instalando aplicativo",
+            description: "O Venice Guide está sendo instalado",
+          });
+          
+          // Hide the prompt after installation
           setIsVisible(false);
-          // Limpa o evento de prompt
+          // Clear the installation prompt
           setInstallPrompt(null);
         } else {
-          console.log("Usuário recusou a instalação");
+          console.log("User declined the installation");
+          toast({
+            title: "Instalação cancelada",
+            description: "Você pode instalar o aplicativo mais tarde se desejar",
+          });
         }
       } catch (error) {
-        console.error("Erro ao tentar instalar o PWA:", error);
+        console.error("Error trying to install PWA:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro na instalação",
+          description: "Não foi possível instalar o aplicativo",
+        });
       }
     } else {
-      console.log("Nenhum evento de instalação disponível");
+      console.log("No installation event available");
       
-      // Se estamos em iOS, mostramos instruções específicas
+      // If we're on iOS, show specific instructions
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       if (isIOS) {
-        alert("Para instalar este app no iOS: toque no ícone de compartilhamento e depois em 'Adicionar à Tela de Início'");
+        toast({
+          title: "Instalação no iOS",
+          description: "Toque no ícone de compartilhamento e depois em 'Adicionar à Tela de Início'",
+        });
+      } else {
+        // Try to trigger the installation manually for other browsers
+        toast({
+          title: "Instalação não disponível",
+          description: "Este navegador não suporta instalação automática de PWA",
+        });
       }
     }
   };
@@ -98,13 +138,13 @@ const PwaInstallPrompt = () => {
       <p className="text-sm text-gray-600 mb-3">
         Instale este aplicativo para acessar o guia de Veneza offline e ter uma experiência melhor.
       </p>
-      <button
+      <Button
         onClick={handleInstall}
-        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors"
+        className="w-full flex items-center justify-center gap-2"
       >
         <Download size={18} />
         <span>Instalar Aplicativo</span>
-      </button>
+      </Button>
     </div>
   );
 };

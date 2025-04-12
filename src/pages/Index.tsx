@@ -3,20 +3,38 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Settings } from "lucide-react";
 import PwaInstallPrompt from "../components/PwaInstallPrompt";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [iframeUrl, setIframeUrl] = useState("https://heyzine.com/flip-book/dce36e099f.html");
   const [iframeTitle, setIframeTitle] = useState("Venice Guide - Interactive Flipbook");
+  const { toast } = useToast();
 
   useEffect(() => {
     // Registra o service worker para PWA
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then(registration => {
+      window.addEventListener('load', async () => {
+        try {
+          const registration = await navigator.serviceWorker.register('/sw.js');
           console.log('Service Worker registrado com sucesso:', registration.scope);
-        }).catch(error => {
-          console.log('Falha ao registrar o Service Worker:', error);
-        });
+          
+          // Forçar atualização do service worker se necessário
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            console.log('Service Worker update found!');
+            
+            newWorker?.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                toast({
+                  title: "Atualização disponível",
+                  description: "Nova versão do aplicativo disponível",
+                });
+              }
+            });
+          });
+        } catch (error) {
+          console.error('Falha ao registrar o Service Worker:', error);
+        }
       });
     }
 
@@ -26,7 +44,7 @@ const Index = () => {
     
     if (savedUrl) setIframeUrl(savedUrl);
     if (savedTitle) setIframeTitle(savedTitle);
-  }, []);
+  }, [toast]);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
