@@ -12,7 +12,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 const PwaInstallPrompt = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isVisible, setIsVisible] = useState(true); // Set to true by default to always show initially
+  const [isVisible, setIsVisible] = useState(true); // Always show initially
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
@@ -32,10 +32,13 @@ const PwaInstallPrompt = () => {
       return;
     }
 
+    // Clear any previous dismissed state to ensure button shows
+    localStorage.removeItem("pwa-prompt-dismissed");
+
     // Store the install prompt event for later use
     const promptHandler = (e: Event) => {
       e.preventDefault();
-      console.log("beforeinstallprompt event captured");
+      console.log("beforeinstallprompt event captured", e);
       setInstallPrompt(e as BeforeInstallPromptEvent);
       setIsVisible(true);
     };
@@ -43,13 +46,6 @@ const PwaInstallPrompt = () => {
     // Listen for the beforeinstallprompt event
     window.addEventListener("beforeinstallprompt", promptHandler);
     
-    // Check if the user has previously dismissed the prompt
-    const hasDismissed = localStorage.getItem("pwa-prompt-dismissed") === "true";
-    if (hasDismissed) {
-      console.log("User previously dismissed the prompt");
-      setIsVisible(false);
-    }
-
     // Listen for appinstalled event
     window.addEventListener("appinstalled", () => {
       console.log("PWA was installed");
@@ -63,9 +59,8 @@ const PwaInstallPrompt = () => {
 
     return () => {
       window.removeEventListener("beforeinstallprompt", promptHandler);
-      window.removeEventListener("appinstalled", () => {});
     };
-  }, [isMobile, toast]);
+  }, [toast]);
 
   const handleInstall = async () => {
     console.log("Install button clicked, prompt:", installPrompt);
@@ -101,27 +96,53 @@ const PwaInstallPrompt = () => {
         }
       } catch (error) {
         console.error("Error trying to install PWA:", error);
-        toast({
-          variant: "destructive",
-          title: "Erro na instalação",
-          description: "Não foi possível instalar o aplicativo",
-        });
+        handleManualInstall();
       }
     } else {
-      console.log("No installation event available");
+      handleManualInstall();
+    }
+  };
+
+  const handleManualInstall = () => {
+    // Detect iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    if (isIOS) {
+      toast({
+        title: "Instalação no iOS",
+        description: "Toque no ícone de compartilhamento e depois em 'Adicionar à Tela de Início'",
+      });
+    } else {
+      // Try to simulate installation on Android
+      // This is a workaround since some browsers might not trigger the beforeinstallprompt event
+      const manifestLink = document.querySelector('link[rel="manifest"]');
       
-      // If we're on iOS, show specific instructions
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      if (isIOS) {
-        toast({
-          title: "Instalação no iOS",
-          description: "Toque no ícone de compartilhamento e depois em 'Adicionar à Tela de Início'",
-        });
+      if (manifestLink) {
+        // Force manifest parsing to trigger installation
+        const manifestURL = manifestLink.getAttribute("href");
+        if (manifestURL) {
+          console.log("Attempting to trigger installation via manifest:", manifestURL);
+          
+          // Create an invisible frame to load the manifest
+          const iframe = document.createElement("iframe");
+          iframe.style.display = "none";
+          iframe.src = manifestURL;
+          document.body.appendChild(iframe);
+          
+          // Remove after a short delay
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+            
+            toast({
+              title: "Instalação manual necessária",
+              description: "Use o menu do navegador para instalar o aplicativo",
+            });
+          }, 500);
+        }
       } else {
-        // For other browsers without the installPrompt event
         toast({
           title: "Instalação manual",
-          description: "Usando o menu do navegador, selecione 'Instalar aplicativo' ou 'Adicionar à tela inicial'",
+          description: "Use o menu do navegador para instalar o aplicativo",
         });
       }
     }

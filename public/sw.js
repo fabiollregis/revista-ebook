@@ -1,7 +1,7 @@
 
 // Service Worker para o Venice Guide PWA
 
-const CACHE_NAME = 'venice-guide-v3';
+const CACHE_NAME = 'venice-guide-v4';
 
 // Arquivos que serão cacheados
 const urlsToCache = [
@@ -56,6 +56,11 @@ self.addEventListener('activate', (event) => {
 
 // Estratégia de cache: stale-while-revalidate
 self.addEventListener('fetch', (event) => {
+  // Não intercepte requisições para o manifest
+  if (event.request.url.includes('manifest.json')) {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -95,8 +100,7 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(err => {
             console.log('Fetch error:', err);
-            // Se falhar ao buscar na rede, podemos tentar servir uma página offline
-            // ou simplesmente retornar o erro
+            // Se falhar ao buscar na rede, podemos servir uma página offline
             return new Response('Network error, not able to fetch resource');
           });
       })

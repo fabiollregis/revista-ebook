@@ -16,7 +16,11 @@ const Index = () => {
       window.addEventListener('load', async () => {
         try {
           console.log("Attempting to register service worker");
-          const registration = await navigator.serviceWorker.register('/sw.js');
+          const registration = await navigator.serviceWorker.register('/sw.js', { 
+            scope: '/',
+            updateViaCache: 'none' // Não use cache para atualizações do SW
+          });
+          
           console.log('Service Worker registrado com sucesso:', registration.scope);
           
           // Forçar atualização do service worker se necessário
@@ -26,16 +30,31 @@ const Index = () => {
             
             newWorker?.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // Atualização disponível
                 toast({
                   title: "Atualização disponível",
                   description: "Nova versão do aplicativo disponível",
                 });
+                
+                // Força a atualização
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
               }
             });
           });
         } catch (error) {
           console.error('Falha ao registrar o Service Worker:', error);
+          toast({
+            variant: "destructive",
+            title: "Erro no PWA",
+            description: "Não foi possível registrar o aplicativo para uso offline",
+          });
         }
+      });
+      
+      // Listen for controller change to reload the page
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('New service worker activated, reloading for fresh content');
+        window.location.reload();
       });
     } else {
       console.log("Service workers not supported in this browser");
@@ -84,7 +103,7 @@ const Index = () => {
         </div>
       </footer>
 
-      {/* Always render the component - the component itself will handle visibility internally */}
+      {/* Always render the installation prompt */}
       <PwaInstallPrompt />
     </div>
   );
