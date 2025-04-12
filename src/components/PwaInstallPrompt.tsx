@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Download, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -40,19 +41,30 @@ const PwaInstallPrompt = () => {
 
   const handleInstall = async () => {
     if (installPrompt) {
-      // Use the stored event to show the install prompt
-      await installPrompt.prompt();
-      const choiceResult = await installPrompt.userChoice;
-      
-      if (choiceResult.outcome === "accepted") {
-        console.log("Usuário aceitou a instalação");
+      try {
+        // Use the stored event to show the install prompt
+        await installPrompt.prompt();
+        const choiceResult = await installPrompt.userChoice;
+        
+        if (choiceResult.outcome === "accepted") {
+          console.log("Usuário aceitou a instalação");
+          // Hide the prompt after successful installation
+          setIsVisible(false);
+        }
+      } catch (error) {
+        console.error("Erro ao tentar instalar o PWA:", error);
+      } finally {
+        setInstallPrompt(null);
       }
-      
-      setInstallPrompt(null);
+    } else {
+      // If we don't have the install prompt event stored,
+      // try to use the manual installation method for iOS
+      if (isMobile && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        alert("Para instalar este aplicativo no seu iPhone ou iPad: toque no ícone de compartilhamento e depois em 'Adicionar à Tela de Início'.");
+      } else if (isMobile && /Android/.test(navigator.userAgent)) {
+        alert("Este app pode ser instalado no seu dispositivo. Procure a opção 'Adicionar à tela inicial' no menu do seu navegador.");
+      }
     }
-    
-    // Hide the prompt after installation attempt
-    setIsVisible(false);
   };
 
   const handleDismiss = () => {
@@ -75,13 +87,14 @@ const PwaInstallPrompt = () => {
       <p className="text-sm text-gray-600 mb-3">
         Instale este aplicativo para acessar o guia de Veneza offline e ter uma experiência melhor.
       </p>
-      <button
+      <Button
         onClick={handleInstall}
         className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors"
+        variant="default"
       >
         <Download size={18} />
         <span>Instalar Aplicativo</span>
-      </button>
+      </Button>
     </div>
   );
 };
