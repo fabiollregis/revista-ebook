@@ -49,3 +49,9 @@ export const slugify = (str: string): string => {
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
 };
+
+/**
+ * Generate a slug from a string (alias for slugify)
+ * @param str
+ */
+export const generateSlug = slugify;
