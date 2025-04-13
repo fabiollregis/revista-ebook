@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const incrementPageView = async (id: string): Promise<boolean> => {
   try {
     // Call the RPC function to increment the view count
+    // We need to type the parameters properly to avoid TypeScript errors
     const { error } = await supabase.rpc('increment_page_view_count', {
       page_id: id
     } as any); // Using type assertion to bypass TypeScript's type checking for RPC params
