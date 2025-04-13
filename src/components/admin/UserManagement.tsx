@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface UserProfile {
   id: string;
@@ -25,6 +26,7 @@ interface UserProfile {
   is_admin: boolean;
   created_at: string;
   updated_at: string;
+  avatar_url?: string | null;
 }
 
 const formSchema = z.object({
@@ -285,7 +287,20 @@ const UserManagement = () => {
                 <TableBody>
                   {users.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.username}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-8 w-8">
+                            {user.avatar_url ? (
+                              <AvatarImage src={user.avatar_url} alt={user.username} />
+                            ) : (
+                              <AvatarFallback className={`bg-gradient-to-br ${getRandomColor(user.id)}`}>
+                                {getInitials(user.username)}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <span>{user.username}</span>
+                        </div>
+                      </TableCell>
                       <TableCell>{formatDate(user.created_at)}</TableCell>
                       <TableCell>
                         <Switch 
@@ -308,9 +323,15 @@ const UserManagement = () => {
                   <Card key={user.id} className="overflow-hidden border-2 transition-all hover:shadow-md">
                     <CardHeader className="p-4 pb-2">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getRandomColor(user.id)} flex items-center justify-center text-white font-semibold`}>
-                          {getInitials(user.username)}
-                        </div>
+                        <Avatar className="w-10 h-10">
+                          {user.avatar_url ? (
+                            <AvatarImage src={user.avatar_url} alt={user.username} />
+                          ) : (
+                            <AvatarFallback className={`bg-gradient-to-br ${getRandomColor(user.id)} flex items-center justify-center text-white font-semibold`}>
+                              {getInitials(user.username)}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
                         <div className="overflow-hidden">
                           <CardTitle className="text-base truncate">{user.username}</CardTitle>
                           <CardDescription className="text-xs truncate flex items-center gap-1">
