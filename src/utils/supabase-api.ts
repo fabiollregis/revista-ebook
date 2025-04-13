@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { PageData, SiteSettings } from "@/types/page";
 import { Json } from "@/integrations/supabase/types";
@@ -154,7 +153,7 @@ export const incrementPageView = async (id: string): Promise<boolean> => {
       page_id: string;
     };
 
-    const { error } = await supabase.rpc<void, IncrementPageViewParams>(
+    const { error } = await supabase.rpc(
       'increment_page_view_count', 
       { page_id: id }
     );
