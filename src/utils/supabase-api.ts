@@ -149,10 +149,10 @@ export const deletePage = async (id: string): Promise<boolean> => {
  */
 export const incrementPageView = async (id: string): Promise<boolean> => {
   try {
-    // Update the function to use a proper type for the parameters
+    // Fix the type issue by using the correct approach for RPC calls
     const { error } = await supabase.rpc('increment_page_view_count', {
       page_id: id
-    });
+    } as { page_id: string });
 
     if (error) {
       console.error("Error incrementing page view:", error);
