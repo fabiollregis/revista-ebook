@@ -69,7 +69,7 @@ const Auth: React.FC = () => {
         
         <Card className="border-border/50 shadow-lg bg-white/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Venice Guide</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Painel Admin</CardTitle>
             <CardDescription className="text-center">Faça login ou crie sua conta</CardDescription>
           </CardHeader>
           
