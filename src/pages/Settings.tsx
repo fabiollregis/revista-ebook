@@ -197,9 +197,14 @@ const Settings = () => {
                           alt="Favicon" 
                           className="max-w-full max-h-full object-contain"
                           onError={(e) => {
-                            // If image fails to load, show initials
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextSibling!.style.display = 'flex';
+                            // Fix: Cast the target to HTMLElement to access style property
+                            const imgElement = e.currentTarget;
+                            imgElement.style.display = 'none';
+                            // Get the next sibling and cast it to HTMLElement
+                            const nextSibling = imgElement.nextSibling as HTMLElement;
+                            if (nextSibling) {
+                              nextSibling.style.display = 'flex';
+                            }
                           }}
                         />
                         <div className="hidden w-full h-full items-center justify-center bg-primary/10 text-primary">
@@ -229,9 +234,14 @@ const Settings = () => {
                           alt="Infográfico" 
                           className="max-w-full max-h-full object-contain"
                           onError={(e) => {
-                            // If image fails to load, show placeholder
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextSibling!.style.display = 'flex';
+                            // Fix: Cast the target to HTMLElement to access style property
+                            const imgElement = e.currentTarget;
+                            imgElement.style.display = 'none';
+                            // Get the next sibling and cast it to HTMLElement
+                            const nextSibling = imgElement.nextSibling as HTMLElement;
+                            if (nextSibling) {
+                              nextSibling.style.display = 'flex';
+                            }
                           }}
                         />
                         <div className="hidden w-full h-full items-center justify-center bg-primary/10 text-primary">
