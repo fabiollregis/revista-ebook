@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { PageData } from "@/types/page";
 
@@ -147,9 +148,10 @@ export const deletePage = async (id: string): Promise<boolean> => {
  */
 export const incrementPageView = async (id: string): Promise<boolean> => {
   try {
+    // Explicitly define the parameters type to avoid TypeScript error
     const { error } = await supabase.rpc('increment_page_view_count', { 
       page_id: id 
-    });
+    } as { page_id: string });
 
     if (error) {
       console.error("Error incrementing page view:", error);
