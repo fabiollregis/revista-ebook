@@ -9,7 +9,7 @@ import InstallPromptCard from "./InstallPromptCard";
  * Main component for handling PWA installation prompt display
  */
 const PwaInstallPrompt = () => {
-  const { isVisible, handleInstall, handleDismiss } = usePwaInstall();
+  const { isVisible, handleInstall, handleDismiss, installInProgress } = usePwaInstall();
   const isMobile = useIsMobile();
   const [config, setConfig] = useState({
     promptTitle: "Instale o Venice Guide",
@@ -39,7 +39,7 @@ const PwaInstallPrompt = () => {
     console.log("PwaInstallPrompt mounted");
   }, []);
   
-  console.log("PwaInstallPrompt render state:", { isVisible, isMobile, loading });
+  console.log("PwaInstallPrompt render state:", { isVisible, isMobile, loading, installInProgress });
 
   if (loading || !isVisible) {
     console.log("Prompt not visible or loading, returning null");
@@ -53,6 +53,7 @@ const PwaInstallPrompt = () => {
       buttonText={config.buttonText}
       onInstall={handleInstall}
       onDismiss={handleDismiss}
+      installInProgress={installInProgress}
     />
   );
 };

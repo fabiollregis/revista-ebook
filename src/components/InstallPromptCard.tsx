@@ -1,6 +1,6 @@
 
 import React from "react";
-import { X, Download } from "lucide-react";
+import { X, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface InstallPromptCardProps {
@@ -9,6 +9,7 @@ interface InstallPromptCardProps {
   buttonText: string;
   onInstall: () => void;
   onDismiss: () => void;
+  installInProgress?: boolean;
 }
 
 /**
@@ -19,7 +20,8 @@ const InstallPromptCard: React.FC<InstallPromptCardProps> = ({
   promptDescription,
   buttonText,
   onInstall,
-  onDismiss
+  onDismiss,
+  installInProgress = false
 }) => {
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white rounded-lg shadow-lg p-4 z-50 border border-gray-200">
@@ -36,9 +38,14 @@ const InstallPromptCard: React.FC<InstallPromptCardProps> = ({
         onClick={onInstall}
         className="w-full flex items-center justify-center gap-2"
         data-install-button
+        disabled={installInProgress}
       >
-        <Download size={18} />
-        <span>{buttonText}</span>
+        {installInProgress ? (
+          <Loader2 size={18} className="animate-spin" />
+        ) : (
+          <Download size={18} />
+        )}
+        <span>{installInProgress ? "Instalando..." : buttonText}</span>
       </Button>
     </div>
   );

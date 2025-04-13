@@ -1,7 +1,7 @@
 
 // Service Worker para o Venice Guide PWA
 
-const CACHE_NAME = 'venice-guide-v5';
+const CACHE_NAME = 'venice-guide-v6';
 
 // Arquivos que serão cacheados
 const urlsToCache = [
@@ -126,10 +126,15 @@ self.addEventListener('message', (event) => {
   }
   
   if (event.data && event.data.type === 'TRIGGER_INSTALL') {
-    // Notifica todos os clientes para mostrar o prompt de instalação
+    // Tenta forçar a instalação do PWA notificando todos os clientes
+    console.log('Service Worker: Received TRIGGER_INSTALL message');
     self.clients.matchAll().then(clients => {
       clients.forEach(client => {
-        client.postMessage({ type: 'SHOW_INSTALL_PROMPT' });
+        console.log('Service Worker: Sending SHOW_INSTALL_PROMPT to client');
+        client.postMessage({ 
+          type: 'SHOW_INSTALL_PROMPT',
+          timestamp: new Date().getTime()
+        });
       });
     });
   }
