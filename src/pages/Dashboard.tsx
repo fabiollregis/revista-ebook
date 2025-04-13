@@ -331,15 +331,7 @@ const Dashboard = () => {
         duration: 0.5
       }}>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-md font-medium">Weekly Summary</CardTitle>
-              <div className="flex items-center gap-1">
-                <span className="text-2xl font-bold">$890.93</span>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
+            
             
           </Card>
         </motion.div>
