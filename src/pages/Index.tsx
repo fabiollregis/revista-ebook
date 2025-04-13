@@ -40,19 +40,8 @@ const Index: React.FC = () => {
 
   const handlePasswordSuccess = () => {
     setIsPasswordModalOpen(false);
-    // Redirecionar para o dashboard após autenticação bem-sucedida
-    toast({
-      title: "Autenticação bem-sucedida",
-      description: "Redirecionando para o dashboard...",
-    });
-    
-    // Salva o estado de autenticação
-    localStorage.setItem("venice-admin-auth", "true");
-    
-    // Redireciona após um breve delay
-    setTimeout(() => {
-      window.location.href = "/dashboard";
-    }, 1000);
+    // Redirecionar para a área de admin após autenticação bem-sucedida
+    window.location.href = "/dashboard";
   };
 
   return (
@@ -70,13 +59,12 @@ const Index: React.FC = () => {
           <div className="flex items-center gap-4">
             <Button 
               variant="ghost" 
-              size="sm"
+              size="icon"
               onClick={() => setIsPasswordModalOpen(true)}
               aria-label="Área administrativa"
-              className="flex items-center gap-2 hover:bg-gray-100"
+              className="rounded-full hover:bg-gray-100"
             >
-              <Lock size={16} />
-              <span className="hidden sm:inline">Admin</span>
+              <Lock size={20} />
             </Button>
           </div>
         </div>
