@@ -94,3 +94,80 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+/* Estilo de bordas de revista para cards */
+.magazine-card {
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.magazine-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.8) 25%, 
+    transparent 50%, 
+    rgba(255, 255, 255, 0.8) 75%, 
+    transparent 100%
+  );
+  z-index: -1;
+  border-radius: 0.65rem;
+  animation: borderLight 6s linear infinite;
+}
+
+.dark .magazine-card::before {
+  background: linear-gradient(45deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.2) 25%, 
+    transparent 50%, 
+    rgba(255, 255, 255, 0.2) 75%, 
+    transparent 100%
+  );
+}
+
+@keyframes borderLight {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 300% 300%;
+  }
+}
+
+/* Efeito de impressão para cards */
+.magazine-card {
+  background-image: 
+    radial-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    radial-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+.dark .magazine-card {
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+/* Efeito de movimento suave */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.magazine-card:hover {
+  animation: float 3s ease-in-out infinite;
+}

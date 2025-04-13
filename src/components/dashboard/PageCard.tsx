@@ -20,16 +20,29 @@ const PageCard: React.FC<PageCardProps> = ({ page, onEdit, onDelete }) => {
     formatDistanceToNow(new Date(page.created_at), { addSuffix: true, locale: ptBR }) : 
     "";
 
+  const cardVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+    hover: { 
+      y: -8,
+      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+      transition: { duration: 0.3 }
+    }
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ y: -4 }}
-      className="transition-all duration-200"
+      initial="initial"
+      animate="animate"
+      whileHover="hover"
+      variants={cardVariants}
+      className="transition-all duration-200 h-full"
     >
-      <Card className="glass-card h-full flex flex-col overflow-hidden">
-        <CardHeader className="pb-2 border-b border-border/20 bg-gradient-to-r from-primary/5 to-transparent">
+      <Card className="magazine-card h-full flex flex-col overflow-hidden border-2 border-indigo-200 dark:border-indigo-800/30 relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 opacity-50"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent dark:from-white/5"></div>
+        
+        <CardHeader className="pb-2 relative z-10 border-b border-border/20 bg-gradient-to-r from-primary/5 to-transparent">
           <CardTitle className="text-lg font-semibold truncate group flex items-center">
             {page.title}
           </CardTitle>
@@ -40,23 +53,23 @@ const PageCard: React.FC<PageCardProps> = ({ page, onEdit, onDelete }) => {
         </CardHeader>
         
         {page.description && (
-          <CardContent className="pt-3 pb-2 flex-grow">
+          <CardContent className="pt-3 pb-2 flex-grow relative z-10">
             <p className="text-sm text-muted-foreground line-clamp-2">{page.description}</p>
           </CardContent>
         )}
         
-        <CardContent className="pt-0 pb-3">
+        <CardContent className="pt-0 pb-3 relative z-10">
           <p className="text-xs text-muted-foreground truncate">
             {page.iframe_url}
           </p>
         </CardContent>
         
-        <CardFooter className="pt-2 pb-3 border-t border-border/20 bg-accent/30 mt-auto">
+        <CardFooter className="pt-2 pb-3 border-t border-border/20 bg-accent/30 mt-auto relative z-10">
           <div className="flex justify-between w-full">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="bg-white/50 dark:bg-background/50 backdrop-blur-sm">
                     <a href={`/page/${page.slug}`} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-4 w-4 mr-1" />
                       Ver
@@ -77,7 +90,7 @@ const PageCard: React.FC<PageCardProps> = ({ page, onEdit, onDelete }) => {
                       variant="ghost" 
                       size="sm"
                       onClick={() => onEdit(page)}
-                      className="text-muted-foreground hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-background/50 backdrop-blur-sm"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
