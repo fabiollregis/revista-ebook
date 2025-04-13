@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { PageData, SiteSettings } from "@/types/page";
 import { Json } from "@/integrations/supabase/types";
@@ -101,7 +102,7 @@ export const savePage = async (pageData: Partial<PageData>): Promise<PageData | 
         .from("pages")
         .insert({
           title: pageData.title,
-          slug: pageData.slug,
+          slug: pageData.slug as string, // Fix the type error here
           iframe_url: pageData.iframe_url,
           description: pageData.description,
         })
