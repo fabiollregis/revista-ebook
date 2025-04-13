@@ -11,9 +11,9 @@ export const incrementPageView = async (id: string): Promise<boolean> => {
       page_id: string;
     }
     
-    // Use any as the return type to bypass TypeScript's constraint
-    // We don't use the return value specifically, so this is acceptable
-    const { error } = await supabase.rpc<any, IncrementPageViewParams>('increment_page_view_count', {
+    // Instead of using generic type parameters, use the non-generic version of rpc
+    // This avoids the type constraints issue entirely
+    const { error } = await supabase.rpc('increment_page_view_count', {
       page_id: id
     });
 
