@@ -22,6 +22,7 @@ const PageForm: React.FC<PageFormProps> = ({ page, onCancel }) => {
   const [title, setTitle] = useState(page?.title || "");
   const [iframeUrl, setIframeUrl] = useState(page?.iframe_url || "");
   const [description, setDescription] = useState(page?.description || "");
+  const [facebookPixelCode, setFacebookPixelCode] = useState(page?.facebook_pixel_code || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,6 +62,7 @@ const PageForm: React.FC<PageFormProps> = ({ page, onCancel }) => {
           title,
           iframe_url: iframeUrl,
           description,
+          facebook_pixel_code: facebookPixelCode,
         });
       } else {
         // Criar nova página
@@ -69,6 +71,7 @@ const PageForm: React.FC<PageFormProps> = ({ page, onCancel }) => {
           slug: generateSlug(title),
           iframe_url: iframeUrl,
           description,
+          facebook_pixel_code: facebookPixelCode,
         });
       }
       
@@ -115,6 +118,21 @@ const PageForm: React.FC<PageFormProps> = ({ page, onCancel }) => {
           disabled={isSubmitting}
         />
         {errors.iframeUrl && <p className="text-red-500 text-sm">{errors.iframeUrl}</p>}
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="facebook-pixel">Código do Pixel do Facebook (opcional)</Label>
+        <Textarea
+          id="facebook-pixel"
+          value={facebookPixelCode}
+          onChange={(e) => setFacebookPixelCode(e.target.value)}
+          placeholder="Insira o código completo do pixel do Facebook"
+          className="min-h-24 font-mono text-xs"
+          disabled={isSubmitting}
+        />
+        <p className="text-xs text-muted-foreground">
+          Insira o código completo do pixel do Facebook, incluindo as tags &lt;script&gt;. Este código será executado apenas nesta página específica.
+        </p>
       </div>
       
       <div className="space-y-2">

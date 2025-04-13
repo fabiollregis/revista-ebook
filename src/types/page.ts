@@ -5,6 +5,7 @@ export interface PageData {
   slug: string;
   iframe_url: string;
   description?: string;
+  facebook_pixel_code?: string;
   created_at: string;
   updated_at: string;
   view_count?: number;

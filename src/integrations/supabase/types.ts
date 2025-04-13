@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          facebook_pixel_code: string | null
           id: string
           iframe_url: string
           slug: string
@@ -23,6 +24,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          facebook_pixel_code?: string | null
           id?: string
           iframe_url: string
           slug: string
@@ -33,6 +35,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          facebook_pixel_code?: string | null
           id?: string
           iframe_url?: string
           slug?: string

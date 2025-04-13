@@ -53,6 +53,7 @@ export function PagesProvider({ children }: { children: ReactNode }) {
         slug,
         iframe_url: data.iframe_url,
         description: data.description,
+        facebook_pixel_code: data.facebook_pixel_code,
       });
       
       if (newPage) {
@@ -82,6 +83,7 @@ export function PagesProvider({ children }: { children: ReactNode }) {
         title: data.title || page.title,
         iframe_url: data.iframe_url || page.iframe_url,
         description: data.description !== undefined ? data.description : page.description,
+        facebook_pixel_code: data.facebook_pixel_code !== undefined ? data.facebook_pixel_code : page.facebook_pixel_code,
         slug: page.slug,
       });
       

@@ -50,6 +50,27 @@ const PageView = () => {
     fetchData();
   }, [slug, toast]);
 
+  // Inserir o código do Pixel do Facebook quando a página carrega
+  useEffect(() => {
+    // Remover qualquer script anterior do Facebook Pixel
+    const oldScripts = document.querySelectorAll('script[data-fb-pixel]');
+    oldScripts.forEach(script => script.remove());
+    
+    if (page?.facebook_pixel_code) {
+      // Criar um elemento de script para o Pixel do Facebook
+      const pixelScript = document.createElement('script');
+      pixelScript.innerHTML = page.facebook_pixel_code;
+      pixelScript.setAttribute('data-fb-pixel', 'true');
+      document.head.appendChild(pixelScript);
+      
+      // Função de limpeza para remover o script quando o componente for desmontado
+      return () => {
+        const scripts = document.querySelectorAll('script[data-fb-pixel]');
+        scripts.forEach(script => script.remove());
+      };
+    }
+  }, [page]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">

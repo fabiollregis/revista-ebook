@@ -83,6 +83,7 @@ export const savePage = async (pageData: Partial<PageData>): Promise<PageData | 
           title: pageData.title,
           iframe_url: pageData.iframe_url,
           description: pageData.description,
+          facebook_pixel_code: pageData.facebook_pixel_code,
           updated_at: new Date().toISOString(),
         })
         .eq("id", pageData.id)
@@ -104,6 +105,7 @@ export const savePage = async (pageData: Partial<PageData>): Promise<PageData | 
           slug: pageData.slug as string,
           iframe_url: pageData.iframe_url,
           description: pageData.description,
+          facebook_pixel_code: pageData.facebook_pixel_code,
         })
         .select()
         .single();
