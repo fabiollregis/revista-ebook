@@ -154,9 +154,9 @@ export const incrementPageView = async (id: string): Promise<boolean> => {
       page_id: string;
     };
 
-    const { error } = await supabase.rpc<null>(
+    const { error } = await supabase.rpc<void, IncrementPageViewParams>(
       'increment_page_view_count', 
-      { page_id: id } as IncrementPageViewParams
+      { page_id: id }
     );
 
     if (error) {
