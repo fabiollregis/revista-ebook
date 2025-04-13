@@ -19,4 +19,6 @@ export interface SiteSettings {
   installPromptTitle: string;
   installPromptDescription: string;
   installButtonText: string;
+  faviconUrl?: string;
+  infographUrl?: string;
 }
