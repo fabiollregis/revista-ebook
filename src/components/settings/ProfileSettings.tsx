@@ -17,6 +17,7 @@ const ProfileSettings: React.FC = () => {
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(!!avatarUrl);
 
   const updateProfile = async () => {
     if (!user) return;
@@ -61,6 +62,16 @@ const ProfileSettings: React.FC = () => {
     setIsUpdating(true);
     
     try {
+      // Check if the avatars bucket exists, if not create it
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const avatarsBucketExists = buckets?.some(b => b.name === 'avatars');
+      
+      if (!avatarsBucketExists) {
+        await supabase.storage.createBucket('avatars', {
+          public: true
+        });
+      }
+      
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file);
@@ -71,6 +82,7 @@ const ProfileSettings: React.FC = () => {
       
       if (data?.publicUrl) {
         setAvatarUrl(data.publicUrl);
+        setIsImageLoading(true);
         
         // Update profile with new avatar URL
         const { error: updateError } = await supabase
@@ -86,6 +98,7 @@ const ProfileSettings: React.FC = () => {
         });
       }
     } catch (error: any) {
+      console.error("Error uploading avatar:", error);
       toast({
         title: "Erro ao fazer upload",
         description: error.message || "Ocorreu um erro ao fazer upload da imagem",
@@ -94,6 +107,11 @@ const ProfileSettings: React.FC = () => {
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleImageError = () => {
+    setIsImageLoading(false);
+    console.error("Failed to load avatar image");
   };
 
   return (
@@ -107,10 +125,17 @@ const ProfileSettings: React.FC = () => {
       <CardContent className="space-y-6">
         <div className="flex items-center space-x-4">
           <Avatar className="w-20 h-20">
-            <AvatarImage src={avatarUrl} alt={username} />
-            <AvatarFallback className="bg-primary/10 text-primary">
-              <User size={30} />
-            </AvatarFallback>
+            {avatarUrl && isImageLoading ? (
+              <AvatarImage 
+                src={avatarUrl} 
+                alt={username} 
+                onError={handleImageError}
+              />
+            ) : (
+              <AvatarFallback className="bg-primary/10 text-primary">
+                <User size={30} />
+              </AvatarFallback>
+            )}
           </Avatar>
           <div>
             <Label htmlFor="avatar-upload" className="cursor-pointer">

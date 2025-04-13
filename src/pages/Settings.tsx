@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,9 +10,12 @@ import NotificationSettings from "@/components/settings/NotificationSettings";
 import GeneralSettings from "@/components/settings/GeneralSettings";
 import DangerZone from "@/components/settings/DangerZone";
 import { User, Key, Bell, Settings as SettingsIcon, AlertTriangle } from "lucide-react";
+
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  return <DashboardLayout>
+  
+  return (
+    <DashboardLayout>
       <PageTransition>
         <div className="container mx-auto py-6">
           <h1 className="text-3xl font-bold mb-6">Configurações</h1>
@@ -32,7 +36,10 @@ const Settings = () => {
                     <Bell size={16} />
                     <span>Notificações</span>
                   </TabsTrigger>
-                  
+                  <TabsTrigger value="general" className="flex items-center gap-2">
+                    <SettingsIcon size={16} />
+                    <span>Gerais</span>
+                  </TabsTrigger>
                   <TabsTrigger value="danger" className="flex items-center gap-2 text-destructive">
                     <AlertTriangle size={16} />
                     <span>Perigo</span>
@@ -65,6 +72,8 @@ const Settings = () => {
           </Tabs>
         </div>
       </PageTransition>
-    </DashboardLayout>;
+    </DashboardLayout>
+  );
 };
+
 export default Settings;
