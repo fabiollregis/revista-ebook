@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { PagesProvider } from "@/contexts/PagesContext";
+import { ThemeProvider } from "@/hooks/use-theme";
 
 // Páginas
 import Index from "./pages/Index";
@@ -19,30 +20,32 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <PagesProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            {/* Páginas públicas */}
-            <Route path="/" element={<Index />} />
-            <Route path="/page/:slug" element={<PageView />} />
-            
-            {/* Páginas do dashboard */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/pages" element={<PagesManager />} />
-            <Route path="/dashboard/settings" element={<Settings />} />
-            
-            {/* Rota de admin legado - redireciona para o dashboard */}
-            <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
-            
-            {/* Página 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </TooltipProvider>
-      </PagesProvider>
-    </BrowserRouter>
+    <ThemeProvider defaultTheme="light">
+      <BrowserRouter>
+        <PagesProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              {/* Páginas públicas */}
+              <Route path="/" element={<Index />} />
+              <Route path="/page/:slug" element={<PageView />} />
+              
+              {/* Páginas do dashboard */}
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/pages" element={<PagesManager />} />
+              <Route path="/dashboard/settings" element={<Settings />} />
+              
+              {/* Rota de admin legado - redireciona para o dashboard */}
+              <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
+              
+              {/* Página 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
+        </PagesProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
