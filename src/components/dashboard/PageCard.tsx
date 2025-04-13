@@ -1,12 +1,11 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { PageData } from "@/types/page";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Edit, Trash2, ExternalLink } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Edit, ExternalLink, Trash } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { PageData } from "@/types/page";
 
 interface PageCardProps {
   page: PageData;
@@ -15,45 +14,59 @@ interface PageCardProps {
 }
 
 const PageCard: React.FC<PageCardProps> = ({ page, onEdit, onDelete }) => {
-  // Formatar a data de criação
-  const formattedDate = formatDistanceToNow(new Date(page.createdAt), {
-    addSuffix: true,
-    locale: ptBR,
-  });
+  const formattedDate = page.created_at ? 
+    formatDistanceToNow(new Date(page.created_at), { addSuffix: true, locale: ptBR }) : 
+    "";
 
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
-        <CardTitle className="line-clamp-1 text-lg">{page.title}</CardTitle>
-        <CardDescription className="line-clamp-2 h-10">{page.description || "Sem descrição"}</CardDescription>
+        <CardTitle className="text-xl font-semibold">{page.title}</CardTitle>
+        <CardDescription>
+          {formattedDate}
+        </CardDescription>
       </CardHeader>
       
-      <CardContent className="pb-2">
-        <div className="flex items-center text-sm text-gray-500">
-          <Calendar size={14} className="mr-1" />
-          <span>Criado {formattedDate}</span>
-        </div>
-        <p className="text-sm text-gray-600 mt-2 line-clamp-1">
-          {page.iframeUrl}
-        </p>
+      {page.description && (
+        <CardContent className="pt-0 pb-3">
+          <p className="text-sm text-gray-600 line-clamp-2">{page.description}</p>
+        </CardContent>
+      )}
+      
+      <CardContent className="pt-0 pb-3">
+        <p className="text-sm text-gray-500 truncate">{page.iframe_url}</p>
       </CardContent>
       
-      <CardFooter className="flex justify-between pt-2">
-        <div className="flex space-x-2">
-          <Button variant="ghost" size="sm" onClick={() => onEdit(page)}>
-            <Edit size={16} className="mr-1" /> Editar
-          </Button>
-          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-800" 
-            onClick={() => onDelete(page)}>
-            <Trash size={16} className="mr-1" /> Excluir
+      <CardFooter className="flex justify-between pt-2 pb-3">
+        <div>
+          <Button variant="outline" size="sm" asChild>
+            <a href={`/page/${page.slug}`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-1 h-4 w-4" />
+              Ver
+            </a>
           </Button>
         </div>
         
-        <Link to={`/page/${page.slug}`} target="_blank">
-          <Button variant="outline" size="sm">
-            <ExternalLink size={16} className="mr-1" /> Visualizar
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => onEdit(page)}
+          >
+            <Edit className="h-4 w-4 mr-1" />
+            Editar
           </Button>
-        </Link>
+          
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => onDelete(page)}
+            className="text-red-500 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            Excluir
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
