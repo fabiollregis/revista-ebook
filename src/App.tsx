@@ -19,7 +19,7 @@ import Settings from "./pages/Settings";
 import PageView from "./pages/PageView";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
-import UserManagement from "./components/admin/UserManagement";
+import UserManagementPage from "./pages/UserManagementPage";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -65,7 +65,7 @@ const App = () => (
                   } />
                   <Route path="/dashboard/users" element={
                     <ProtectedRoute requireAdmin={true}>
-                      <UserManagement />
+                      <UserManagementPage />
                     </ProtectedRoute>
                   } />
                   
