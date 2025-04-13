@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { PageData, SiteSettings } from "@/types/page";
 import { Json } from "@/integrations/supabase/types";
@@ -148,8 +149,8 @@ export const deletePage = async (id: string): Promise<boolean> => {
  */
 export const incrementPageView = async (id: string): Promise<boolean> => {
   try {
-    // Fix the type error by properly typing the parameters for the RPC call
-    const { data, error } = await supabase.rpc('increment_page_view_count', {
+    // Update the function to use a proper type for the parameters
+    const { error } = await supabase.rpc('increment_page_view_count', {
       page_id: id
     });
 
