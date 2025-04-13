@@ -6,15 +6,30 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export const incrementPageView = async (id: string): Promise<boolean> => {
   try {
-    // Call the RPC function without using generic type parameters
-    // This approach avoids TypeScript constraints issues
-    const { error } = await supabase
+    // First, get the current view count
+    const { data: pageData, error: fetchError } = await supabase
       .from('pages')
-      .update({ view_count: supabase.sql`view_count + 1` })
+      .select('view_count')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching page view count:", fetchError);
+      return false;
+    }
+
+    // Increment the view count by 1
+    const currentCount = pageData.view_count || 0;
+    const newCount = currentCount + 1;
+
+    // Update the page with the new view count
+    const { error: updateError } = await supabase
+      .from('pages')
+      .update({ view_count: newCount })
       .eq('id', id);
 
-    if (error) {
-      console.error("Error incrementing page view:", error);
+    if (updateError) {
+      console.error("Error incrementing page view:", updateError);
       return false;
     }
 
