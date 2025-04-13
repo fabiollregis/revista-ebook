@@ -12,6 +12,9 @@ import {
 } from "@/utils/pwa-install-instructions";
 import { checkServiceWorkerRegistration } from "@/utils/service-worker";
 
+// Armazenar o evento globalmente para garantir que não se perca durante a renderização
+let deferredPrompt: BeforeInstallPromptEvent | null = null;
+
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
@@ -24,68 +27,116 @@ export const usePwaInstall = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [installInProgress, setInstallInProgress] = useState(false);
+  const [diagnosticInfo, setDiagnosticInfo] = useState<any>({});
   const { toast } = useToast();
   const browser = detectBrowser();
 
   useEffect(() => {
     console.log("usePwaInstall hook initialized");
     
-    // If already in standalone mode, hide the prompt
-    if (browser.isInStandaloneMode()) {
+    // Se o evento já foi capturado globalmente, use-o
+    if (deferredPrompt) {
+      console.log("Using previously captured beforeinstallprompt event");
+      setInstallPrompt(deferredPrompt);
+    }
+    
+    // Se já estiver no modo standalone, oculte o prompt
+    const inStandaloneMode = browser.isInStandaloneMode();
+    console.log("App standalone mode:", inStandaloneMode);
+    if (inStandaloneMode) {
       console.log("App is already installed as PWA, hiding prompt");
       setIsVisible(false);
       return;
     }
 
-    // Clear any previous state to ensure button appears
+    // Limpe qualquer estado anterior para garantir que o botão apareça
     localStorage.removeItem("pwa-prompt-dismissed");
 
-    // Store the installation prompt event for later use
+    // Armazene o evento de instalação para uso posterior
     const promptHandler = (e: Event) => {
       e.preventDefault();
       console.log("beforeinstallprompt event captured", e);
+      // Armazene globalmente e no estado
+      deferredPrompt = e as BeforeInstallPromptEvent;
       setInstallPrompt(e as BeforeInstallPromptEvent);
       setIsVisible(true);
+      
+      // Colete informações de diagnóstico
+      setDiagnosticInfo(prev => ({
+        ...prev,
+        beforeinstallpromptCaptured: true,
+        timestamp: new Date().toISOString()
+      }));
     };
 
-    // Listen for the beforeinstallprompt event
+    // Ouça o evento beforeinstallprompt
     window.addEventListener("beforeinstallprompt", promptHandler);
     
-    // Listen for the appinstalled event
+    // Ouça o evento appinstalled
     window.addEventListener("appinstalled", () => {
       console.log("PWA was installed");
       setIsVisible(false);
       setInstallPrompt(null);
+      deferredPrompt = null;
       setInstallInProgress(false);
       toast({
         title: "Aplicativo instalado",
         description: "O Venice Guide foi instalado com sucesso!",
       });
+      
+      setDiagnosticInfo(prev => ({
+        ...prev,
+        appInstalled: true,
+        installTimestamp: new Date().toISOString()
+      }));
     });
 
-    // Check for service worker registration
-    checkServiceWorkerRegistration();
+    // Verifique o registro do service worker
+    checkServiceWorkerRegistration().then(registration => {
+      setDiagnosticInfo(prev => ({
+        ...prev,
+        serviceWorkerRegistered: !!registration,
+        serviceWorkerActive: registration?.active ? true : false,
+        serviceWorkerScope: registration?.scope
+      }));
+    });
+    
+    // Verifique se o manifest está presente
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+    setDiagnosticInfo(prev => ({
+        ...prev,
+        manifestPresent: !!manifestLink,
+        manifestHref: manifestLink?.getAttribute('href')
+    }));
 
+    // Limpe os listeners quando desmontado
     return () => {
       window.removeEventListener("beforeinstallprompt", promptHandler);
     };
   }, [toast, browser]);
 
   const handleInstall = async () => {
-    console.log("Install button clicked, prompt:", installPrompt);
+    console.log("Install button clicked", {
+      promptAvailable: !!installPrompt || !!deferredPrompt,
+      browserInfo: browser,
+      diagnosticInfo
+    });
     
     setInstallInProgress(true);
     
-    // Different installation strategies based on platform
-    if (installPrompt) {
-      // Standard installation prompt method (Chrome, Edge, etc.)
+    // Use o evento armazenado globalmente se o estado não o tiver
+    const promptToUse = installPrompt || deferredPrompt;
+    
+    // Diferentes estratégias de instalação com base na plataforma
+    if (promptToUse) {
+      // Método padrão de solicitação de instalação (Chrome, Edge, etc.)
       try {
         console.log("Attempting to show installation prompt");
-        // Show installation prompt
-        await installPrompt.prompt();
+        // Mostrar solicitação de instalação
+        await promptToUse.prompt();
         
-        // Wait for user's choice
-        const choiceResult = await installPrompt.userChoice;
+        // Aguarde a escolha do usuário
+        const choiceResult = await promptToUse.userChoice;
         
         console.log('Installation result:', choiceResult.outcome);
         
@@ -95,6 +146,8 @@ export const usePwaInstall = () => {
             title: "Instalando aplicativo",
             description: "O Venice Guide está sendo instalado",
           });
+          // Limpe o evento armazenado após uso bem-sucedido
+          deferredPrompt = null;
         } else {
           console.log("User declined the installation");
           toast({
@@ -108,16 +161,17 @@ export const usePwaInstall = () => {
         handlePlatformSpecificInstall();
       }
     } else {
+      console.log("No installation prompt available, trying platform-specific install");
       handlePlatformSpecificInstall();
     }
   };
 
   const handlePlatformSpecificInstall = () => {
-    // iOS Safari specific installation
+    // iOS Safari instalação específica
     if (browser.isIOS && (browser.isSafari || browser.isChromeForIOS)) {
       showIOSInstallInstructions(toast);
     } 
-    // Android specific
+    // Android específico
     else if (browser.isAndroid) {
       if (browser.isFirefox) {
         showFirefoxInstallInstructions(toast);
@@ -133,13 +187,13 @@ export const usePwaInstall = () => {
     else if (browser.isWindowsPhone) {
       showGenericInstallInstructions(toast);
     } 
-    // Desktop browsers
+    // Navegadores desktop
     else if (browser.isFirefox) {
       showFirefoxInstallInstructions(toast);
     } else if (browser.isOpera) {
       showOperaInstallInstructions(toast);
     } else {
-      // Generic browser instructions
+      // Instruções genéricas de navegador
       showGenericInstallInstructions(toast);
     }
     
@@ -149,15 +203,26 @@ export const usePwaInstall = () => {
   const handleDismiss = () => {
     console.log("Dismissing prompt");
     setIsVisible(false);
-    // Store in localStorage that the user dismissed the prompt
+    // Armazene no localStorage que o usuário descartou o prompt
     localStorage.setItem("pwa-prompt-dismissed", "true");
   };
 
+  // Inclua informações de diagnóstico no retorno para depuração
   return {
     isVisible,
-    installPrompt,
+    installPrompt: installPrompt || deferredPrompt,
     handleInstall,
     handleDismiss,
-    installInProgress
+    installInProgress,
+    diagnosticInfo
   };
 };
+
+// Capture o evento o mais cedo possível, fora do hook
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('beforeinstallprompt capturado globalmente');
+    e.preventDefault();
+    deferredPrompt = e as any;
+  });
+}

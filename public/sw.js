@@ -1,7 +1,6 @@
-
 // Service Worker para o Venice Guide PWA
 
-const CACHE_NAME = 'venice-guide-v6';
+const CACHE_NAME = 'venice-guide-v7';
 
 // Arquivos que serão cacheados
 const urlsToCache = [
@@ -12,6 +11,9 @@ const urlsToCache = [
   '/icons/icon-512x512.png',
   '/admin'
 ];
+
+// Log de diagnóstico do service worker
+console.log('Service Worker: Script carregado');
 
 // Instalação do service worker
 self.addEventListener('install', (event) => {
@@ -65,6 +67,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // Não intercepte requisições para o manifest
   if (event.request.url.includes('manifest.json')) {
+    console.log('Service Worker: Fetching manifest.json directly');
     return;
   }
   
@@ -116,6 +119,8 @@ self.addEventListener('fetch', (event) => {
 
 // Lidar com mensagens enviadas para o service worker
 self.addEventListener('message', (event) => {
+  console.log('Service Worker: Received message', event.data);
+
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
@@ -134,6 +139,23 @@ self.addEventListener('message', (event) => {
         client.postMessage({ 
           type: 'SHOW_INSTALL_PROMPT',
           timestamp: new Date().getTime()
+        });
+      });
+    });
+  }
+  
+  // Diagnóstico do service worker
+  if (event.data && event.data.type === 'DIAGNOSTICS') {
+    const diagnostics = {
+      state: self.state,
+      timestamp: new Date().toISOString()
+    };
+    
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({ 
+          type: 'DIAGNOSTICS_RESULT',
+          diagnostics
         });
       });
     });
@@ -188,4 +210,11 @@ self.addEventListener('notificationclick', (event) => {
       }
     })
   );
+});
+
+// Verifica se o manifesto está disponível e bem formado
+self.registration.getManifest().then(manifest => {
+  console.log('Service Worker: Manifest loaded successfully', manifest);
+}).catch(error => {
+  console.error('Service Worker: Error loading manifest', error);
 });

@@ -10,19 +10,36 @@ import InstallPromptCard from "./InstallPromptCard";
  * Handles loading configuration and installation logic
  */
 const PwaInstallPromptContainer = () => {
-  const { isVisible, handleInstall, handleDismiss, installInProgress } = usePwaInstall();
+  const { isVisible, handleInstall, handleDismiss, installInProgress, diagnosticInfo } = usePwaInstall();
   const { config, loading } = usePwaConfig();
   const isMobile = useIsMobile();
 
   // Debug info
   useEffect(() => {
     console.log("PwaInstallPrompt mounted");
-  }, []);
+    
+    // Log diagnostic information
+    console.log("PWA Diagnostic Info:", diagnosticInfo);
+    
+    // Adicione um listener para mensagens do service worker
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'SHOW_INSTALL_PROMPT') {
+          console.log('Received SHOW_INSTALL_PROMPT from service worker', event.data);
+        }
+      });
+    }
+  }, [diagnosticInfo]);
   
   console.log("PwaInstallPrompt render state:", { isVisible, isMobile, loading, installInProgress });
 
-  if (loading || !isVisible) {
-    console.log("Prompt not visible or loading, returning null");
+  if (loading) {
+    console.log("PWA config is still loading, returning null");
+    return null;
+  }
+
+  if (!isVisible) {
+    console.log("PWA prompt is not visible, returning null");
     return null;
   }
 
