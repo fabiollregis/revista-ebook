@@ -5,16 +5,18 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import SiteSettingsForm from "@/components/admin/SiteSettingsForm";
 import IframeSettingsForm from "@/components/admin/IframeSettingsForm";
 import ContentSettingsForm from "@/components/admin/ContentSettingsForm";
+import UserManagement from "@/components/admin/UserManagement";
 import SaveButton from "@/components/admin/SaveButton";
 import PasswordProtection from "@/components/admin/PasswordProtection";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Settings, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 
 const AdminContent = () => {
+  const [activeTab, setActiveTab] = useState("settings");
   const { toast } = useToast();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -27,7 +29,24 @@ const AdminContent = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-between items-center mb-6">
+        <Tabs 
+          defaultValue={activeTab} 
+          onValueChange={setActiveTab} 
+          className="w-full max-w-md"
+        >
+          <TabsList>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings size={16} />
+              <span>Configurações</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users size={16} />
+              <span>Usuários</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        
         <Button 
           variant="outline" 
           onClick={handleLogout}
@@ -37,10 +56,17 @@ const AdminContent = () => {
           <span>Sair</span>
         </Button>
       </div>
-      <SiteSettingsForm />
-      <IframeSettingsForm />
-      <ContentSettingsForm />
-      <SaveButton />
+      
+      <TabsContent value="settings" className="space-y-6 mt-0">
+        <SiteSettingsForm />
+        <IframeSettingsForm />
+        <ContentSettingsForm />
+        <SaveButton />
+      </TabsContent>
+      
+      <TabsContent value="users" className="mt-0">
+        <UserManagement />
+      </TabsContent>
     </div>
   );
 };

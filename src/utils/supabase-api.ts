@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { PageData, SiteSettings } from "@/types/page";
 import { Json } from "@/integrations/supabase/types";
@@ -102,7 +101,7 @@ export const savePage = async (pageData: Partial<PageData>): Promise<PageData | 
         .from("pages")
         .insert({
           title: pageData.title,
-          slug: pageData.slug as string, // Fix the type error here
+          slug: pageData.slug as string,
           iframe_url: pageData.iframe_url,
           description: pageData.description,
         })
@@ -150,9 +149,9 @@ export const deletePage = async (id: string): Promise<boolean> => {
 export const incrementPageView = async (id: string): Promise<boolean> => {
   try {
     // Fix the type error by properly typing the parameters for the RPC call
-    const { data, error } = await supabase.rpc('increment_page_view_count', { 
-      page_id: id 
-    } as any); // Using 'as any' temporarily to resolve the type issue
+    const { data, error } = await supabase.rpc('increment_page_view_count', {
+      page_id: id
+    });
 
     if (error) {
       console.error("Error incrementing page view:", error);
@@ -211,6 +210,53 @@ export const saveSiteSettings = async (settings: SiteSettings): Promise<boolean>
     return true;
   } catch (error) {
     console.error("Failed to save site settings:", error);
+    return false;
+  }
+};
+
+/**
+ * Get all user profiles
+ */
+export const getUserProfiles = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching user profiles:", error);
+      throw error;
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Failed to fetch user profiles:", error);
+    return [];
+  }
+};
+
+/**
+ * Update user admin status
+ */
+export const updateUserAdminStatus = async (userId: string, isAdmin: boolean): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ 
+        is_admin: isAdmin,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", userId);
+
+    if (error) {
+      console.error("Error updating user admin status:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Failed to update user admin status:", error);
     return false;
   }
 };
