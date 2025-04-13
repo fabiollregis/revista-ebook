@@ -5,31 +5,18 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import SiteSettingsForm from "@/components/admin/SiteSettingsForm";
 import IframeSettingsForm from "@/components/admin/IframeSettingsForm";
 import ContentSettingsForm from "@/components/admin/ContentSettingsForm";
-import InstallPromptForm from "@/components/admin/InstallPromptForm";
 import SaveButton from "@/components/admin/SaveButton";
 import PasswordProtection from "@/components/admin/PasswordProtection";
 import { useAdmin } from "@/contexts/AdminContext";
 
 const AdminContent = () => {
-  const { 
-    installPromptTitle, setInstallPromptTitle,
-    installPromptDescription, setInstallPromptDescription,
-    installButtonText, setInstallButtonText
-  } = useAdmin();
+  // Removed PWA-related state and props
 
   return (
     <div className="space-y-6">
       <SiteSettingsForm />
       <IframeSettingsForm />
       <ContentSettingsForm />
-      <InstallPromptForm 
-        installPromptTitle={installPromptTitle}
-        installPromptDescription={installPromptDescription}
-        installButtonText={installButtonText}
-        onTitleChange={setInstallPromptTitle}
-        onDescriptionChange={setInstallPromptDescription}
-        onButtonTextChange={setInstallButtonText}
-      />
       <SaveButton />
     </div>
   );
