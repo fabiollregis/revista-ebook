@@ -6,16 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export const incrementPageView = async (id: string): Promise<boolean> => {
   try {
-    // Define a properly typed interface for the RPC function parameters
-    interface IncrementPageViewParams {
-      page_id: string;
-    }
-    
-    // Instead of using generic type parameters, use the non-generic version of rpc
-    // This avoids the type constraints issue entirely
-    const { error } = await supabase.rpc('increment_page_view_count', {
-      page_id: id
-    });
+    // Call the RPC function without using generic type parameters
+    // This approach avoids TypeScript constraints issues
+    const { error } = await supabase
+      .from('pages')
+      .update({ view_count: supabase.sql`view_count + 1` })
+      .eq('id', id);
 
     if (error) {
       console.error("Error incrementing page view:", error);
