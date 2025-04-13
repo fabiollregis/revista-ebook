@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { PageData, SiteSettings } from "@/types/page";
 import { Json } from "@/integrations/supabase/types";
@@ -140,6 +139,26 @@ export const deletePage = async (id: string): Promise<boolean> => {
     return true;
   } catch (error) {
     console.error("Failed to delete page:", error);
+    return false;
+  }
+};
+
+/**
+ * Increment the view count for a page
+ */
+export const incrementPageView = async (id: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .rpc('increment_page_view_count', { page_id: id });
+
+    if (error) {
+      console.error("Error incrementing page view:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Failed to increment page view:", error);
     return false;
   }
 };

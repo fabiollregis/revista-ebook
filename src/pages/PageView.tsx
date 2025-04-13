@@ -4,7 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { PageData, SiteSettings } from "@/types/page";
 import { Button } from "@/components/ui/button";
 import { getSiteSettings } from "@/utils/supabase-api";
-import { getPageBySlug } from "@/utils/supabase-api";
+import { getPageBySlug, incrementPageView } from "@/utils/supabase-api";
 import { useToast } from "@/hooks/use-toast";
 
 const PageView = () => {
@@ -30,6 +30,9 @@ const PageView = () => {
           if (pageData) {
             // Update the page title
             document.title = `${pageData.title} | ${siteSettings.siteTitle}`;
+            
+            // Increment view count
+            await incrementPageView(pageData.id);
           }
         }
       } catch (error) {

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Edit, Trash2, ExternalLink, Clock } from "lucide-react";
+import { Edit, Trash2, ExternalLink, Clock, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,6 +62,10 @@ const PageCard: React.FC<PageCardProps> = ({ page, onEdit, onDelete }) => {
           <p className="text-xs text-muted-foreground truncate">
             {page.iframe_url}
           </p>
+          <div className="flex items-center mt-2 text-xs text-muted-foreground">
+            <Eye className="h-3 w-3 mr-1" />
+            <span>{page.view_count || 0} visualizações</span>
+          </div>
         </CardContent>
         
         <CardFooter className="pt-2 pb-3 border-t border-border/20 bg-accent/30 mt-auto relative z-10">
