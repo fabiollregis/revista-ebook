@@ -74,10 +74,7 @@ const Auth: React.FC = () => {
           </CardHeader>
           
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              
-            </TabsList>
+            
             
             <TabsContent value="login">
               <form onSubmit={handleSignIn}>
