@@ -1,11 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  BarChart4, CreditCard, DollarSign, FileText, MoreHorizontal, 
-  Settings, TrendingUp, Calendar, ArrowUp
-} from "lucide-react";
+import { BarChart4, CreditCard, DollarSign, FileText, MoreHorizontal, Settings, TrendingUp, Calendar, ArrowUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { createAdminUser } from "@/utils/create-admin-user";
@@ -15,31 +11,47 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 import { Button } from "@/components/ui/button";
 
 // Sample data for the chart
-const activityData = [
-  { day: '06 Jan', views: 1000, pages: 2400 },
-  { day: '07 Jan', views: 1500, pages: 2800 },
-  { day: '08 Jan', views: 800, pages: 2200 },
-  { day: '09 Jan', views: 1200, pages: 1800 },
-  { day: '10 Jan', views: 2000, pages: 2400 },
-  { day: '11 Jan', views: 2500, pages: 3000 },
-];
-
+const activityData = [{
+  day: '06 Jan',
+  views: 1000,
+  pages: 2400
+}, {
+  day: '07 Jan',
+  views: 1500,
+  pages: 2800
+}, {
+  day: '08 Jan',
+  views: 800,
+  pages: 2200
+}, {
+  day: '09 Jan',
+  views: 1200,
+  pages: 1800
+}, {
+  day: '10 Jan',
+  views: 2000,
+  pages: 2400
+}, {
+  day: '11 Jan',
+  views: 2500,
+  pages: 3000
+}];
 const Dashboard = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const [pages, setPages] = useState<PageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalViews, setTotalViews] = useState(0);
-  
   useEffect(() => {
     // Create admin user on first load
     createAdminUser();
-    
     const fetchPages = async () => {
       setLoading(true);
       try {
         const pagesData = await getPages();
         setPages(pagesData);
-        
+
         // Calculate total views
         const views = pagesData.reduce((total, page) => total + (page.view_count || 0), 0);
         setTotalViews(views);
@@ -49,22 +61,22 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    
     fetchPages();
   }, []);
 
   // Get user's first name
   const firstName = user?.email ? user.email.split('@')[0] : 'User';
-  
-  return (
-    <DashboardLayout>
+  return <DashboardLayout>
       <div className="space-y-6">
-        <motion.div 
-          className="flex items-center justify-between"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <motion.div className="flex items-center justify-between" initial={{
+        opacity: 0,
+        y: -10
+      }} animate={{
+        opacity: 1,
+        y: 0
+      }} transition={{
+        duration: 0.5
+      }}>
           <div>
             <h1 className="text-3xl font-bold">Welcome back, {firstName}!</h1>
             <p className="text-muted-foreground mt-1">Here's what's happening with your pages</p>
@@ -79,11 +91,16 @@ const Dashboard = () => {
         
         {/* Main Account Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: 0.1,
+          duration: 0.5
+        }}>
             <Card className="h-full">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-md font-medium">
@@ -97,27 +114,8 @@ const Dashboard = () => {
                 <div className="flex items-center justify-center mb-4">
                   <div className="relative h-32 w-32">
                     <svg className="h-full w-full" viewBox="0 0 100 100">
-                      <circle
-                        className="text-primary/20"
-                        strokeWidth="10"
-                        stroke="currentColor"
-                        fill="transparent"
-                        r="40"
-                        cx="50"
-                        cy="50"
-                      />
-                      <circle
-                        className="text-primary"
-                        strokeWidth="10"
-                        strokeDasharray={250}
-                        strokeDashoffset={100}
-                        strokeLinecap="round"
-                        stroke="currentColor"
-                        fill="transparent"
-                        r="40"
-                        cx="50"
-                        cy="50"
-                      />
+                      <circle className="text-primary/20" strokeWidth="10" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                      <circle className="text-primary" strokeWidth="10" strokeDasharray={250} strokeDashoffset={100} strokeLinecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
@@ -138,11 +136,16 @@ const Dashboard = () => {
             </Card>
           </motion.div>
           
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: 0.2,
+          duration: 0.5
+        }}>
             <Card className="h-full">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-md font-medium">
@@ -156,27 +159,8 @@ const Dashboard = () => {
                 <div className="flex items-center justify-center mb-4">
                   <div className="relative h-32 w-32">
                     <svg className="h-full w-full" viewBox="0 0 100 100">
-                      <circle
-                        className="text-blue-100"
-                        strokeWidth="10"
-                        stroke="currentColor"
-                        fill="transparent"
-                        r="40"
-                        cx="50"
-                        cy="50"
-                      />
-                      <circle
-                        className="text-blue-500"
-                        strokeWidth="10"
-                        strokeDasharray={250}
-                        strokeDashoffset={210}
-                        strokeLinecap="round"
-                        stroke="currentColor"
-                        fill="transparent"
-                        r="40"
-                        cx="50"
-                        cy="50"
-                      />
+                      <circle className="text-blue-100" strokeWidth="10" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                      <circle className="text-blue-500" strokeWidth="10" strokeDasharray={250} strokeDashoffset={210} strokeLinecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
@@ -202,11 +186,16 @@ const Dashboard = () => {
         
         {/* Your Pages / Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: 0.3,
+          duration: 0.5
+        }}>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-md font-medium">Your Pages</CardTitle>
@@ -216,11 +205,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {loading ? (
-                    <p className="text-center text-muted-foreground py-8">Loading pages...</p>
-                  ) : pages.length > 0 ? (
-                    pages.slice(0, 3).map((page) => (
-                      <div key={page.id} className="flex items-center justify-between p-2 rounded-lg bg-accent/50">
+                  {loading ? <p className="text-center text-muted-foreground py-8">Loading pages...</p> : pages.length > 0 ? pages.slice(0, 3).map(page => <div key={page.id} className="flex items-center justify-between p-2 rounded-lg bg-accent/50">
                         <div className="flex items-center">
                           <div className="w-10 h-10 rounded flex items-center justify-center bg-primary text-primary-foreground mr-3">
                             <FileText className="h-5 w-5" />
@@ -232,21 +217,13 @@ const Dashboard = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="text-sm font-semibold">
-                            {(page.view_count || 0) > 0 ? (
-                              <div className="flex items-center text-green-500">
+                            {(page.view_count || 0) > 0 ? <div className="flex items-center text-green-500">
                                 <ArrowUp className="h-3 w-3 mr-1" />
-                                {(page.view_count || 0)}
-                              </div>
-                            ) : (
-                              <span className="text-muted-foreground">No views</span>
-                            )}
+                                {page.view_count || 0}
+                              </div> : <span className="text-muted-foreground">No views</span>}
                           </div>
                         </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-muted-foreground py-8">No pages found</p>
-                  )}
+                      </div>) : <p className="text-center text-muted-foreground py-8">No pages found</p>}
                 </div>
                 <div className="mt-4 pt-4 border-t">
                   <Button variant="outline" className="w-full" asChild>
@@ -257,11 +234,16 @@ const Dashboard = () => {
             </Card>
           </motion.div>
           
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: 0.4,
+          duration: 0.5
+        }}>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-md font-medium">Activity</CardTitle>
@@ -272,32 +254,31 @@ const Dashboard = () => {
               <CardContent>
                 <div className="h-[200px] mt-3">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={activityData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                      <XAxis dataKey="day" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+                    <LineChart data={activityData} margin={{
+                    top: 5,
+                    right: 10,
+                    left: 0,
+                    bottom: 5
+                  }}>
+                      <XAxis dataKey="day" tick={{
+                      fontSize: 12
+                    }} tickLine={false} axisLine={false} />
                       <YAxis hide={true} />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: "var(--background)", 
-                          border: "1px solid var(--border)",
-                          borderRadius: "6px"
-                        }} 
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="views" 
-                        stroke="#2563eb" 
-                        strokeWidth={2} 
-                        dot={{ r: 3 }} 
-                        activeDot={{ r: 5 }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="pages" 
-                        stroke="#f97316" 
-                        strokeWidth={2} 
-                        dot={{ r: 3 }} 
-                        activeDot={{ r: 5 }}
-                      />
+                      <Tooltip contentStyle={{
+                      backgroundColor: "var(--background)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "6px"
+                    }} />
+                      <Line type="monotone" dataKey="views" stroke="#2563eb" strokeWidth={2} dot={{
+                      r: 3
+                    }} activeDot={{
+                      r: 5
+                    }} />
+                      <Line type="monotone" dataKey="pages" stroke="#f97316" strokeWidth={2} dot={{
+                      r: 3
+                    }} activeDot={{
+                      r: 5
+                    }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -339,11 +320,16 @@ const Dashboard = () => {
         </div>
         
         {/* Weekly Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-        >
+        <motion.div initial={{
+        opacity: 0,
+        y: 20
+      }} animate={{
+        opacity: 1,
+        y: 0
+      }} transition={{
+        delay: 0.5,
+        duration: 0.5
+      }}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-md font-medium">Weekly Summary</CardTitle>
@@ -354,29 +340,10 @@ const Dashboard = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="h-32">
-                <div className="h-full flex items-end gap-1">
-                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-                    <div key={day} className="flex-1 h-full flex flex-col justify-end items-center">
-                      <div 
-                        className={`w-full rounded-t-sm bg-primary ${i === 3 ? 'h-4/5' : i % 2 === 0 ? 'h-1/3' : 'h-1/2'}`} 
-                        style={{ opacity: i === 3 ? 1 : 0.7 }}
-                      ></div>
-                      <div className="text-xs mt-1 text-muted-foreground">{day}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="pt-2 text-xs text-muted-foreground text-center border-t mt-4">
-                MAX
-              </div>
-            </CardContent>
+            
           </Card>
         </motion.div>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default Dashboard;
