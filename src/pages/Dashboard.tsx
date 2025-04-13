@@ -198,7 +198,7 @@ const Dashboard = () => {
         }}>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-md font-medium">Your Pages</CardTitle>
+                <CardTitle className="text-md font-medium">Páginas Criadas</CardTitle>
                 <Button variant="ghost" size="icon">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
