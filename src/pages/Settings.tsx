@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { SiteSettings } from "@/types/page";
-import { getSiteSettings, saveSiteSettings } from "@/utils/supabase-api";
+import { getSiteSettings, saveSiteSettings } from "@/utils/supabase/settings-api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const Settings = () => {

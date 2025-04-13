@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { getUserProfiles, updateUserAdminStatus } from "@/utils/supabase-api";
+import { getUserProfiles, updateUserAdminStatus } from "@/utils/supabase/user-api";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

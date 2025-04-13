@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { PageData, SiteSettings } from "@/types/page";
 import { Button } from "@/components/ui/button";
-import { getSiteSettings } from "@/utils/supabase-api";
-import { getPageBySlug, incrementPageView } from "@/utils/supabase-api";
+import { getPageBySlug, incrementPageView } from "@/utils/supabase/page-api";
+import { getSiteSettings } from "@/utils/supabase/settings-api";
 import { useToast } from "@/hooks/use-toast";
 
 const PageView = () => {

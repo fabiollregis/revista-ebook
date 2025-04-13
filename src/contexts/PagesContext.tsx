@@ -1,7 +1,8 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { PageData } from "@/types/page";
-import { getPages, savePage, deletePage, getPageById, getPageBySlug } from "@/utils/supabase-api";
+import { getPages, savePage, deletePage, getPageById } from "@/utils/supabase/page-api";
+import { getPageBySlug as getPageBySlugApi } from "@/utils/supabase/page-api";
 import { useToast } from "@/hooks/use-toast";
 import { generateSlug } from "@/utils/string-utils";
 
