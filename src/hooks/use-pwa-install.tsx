@@ -1,6 +1,16 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { detectBrowser } from "@/utils/browser-detection";
+import { 
+  showIOSInstallInstructions,
+  showFirefoxInstallInstructions,
+  showOperaInstallInstructions,
+  showSamsungInstallInstructions,
+  showGenericInstallInstructions,
+  triggerAndroidInstallation
+} from "@/utils/pwa-install-instructions";
+import { checkServiceWorkerRegistration } from "@/utils/service-worker";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -15,18 +25,13 @@ export const usePwaInstall = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [installInProgress, setInstallInProgress] = useState(false);
   const { toast } = useToast();
+  const browser = detectBrowser();
 
   useEffect(() => {
     console.log("usePwaInstall hook initialized");
     
-    // Function to check if already installed as PWA
-    const isInStandaloneMode = () => 
-      window.matchMedia('(display-mode: standalone)').matches || 
-      (window.navigator as any).standalone ||
-      document.referrer.includes('android-app://');
-    
     // If already in standalone mode, hide the prompt
-    if (isInStandaloneMode()) {
+    if (browser.isInStandaloneMode()) {
       console.log("App is already installed as PWA, hiding prompt");
       setIsVisible(false);
       return;
@@ -59,24 +64,12 @@ export const usePwaInstall = () => {
     });
 
     // Check for service worker registration
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then((registration) => {
-        if (registration) {
-          console.log("Service worker is registered", registration);
-        } else {
-          console.log("No service worker registration found");
-        }
-      }).catch(err => {
-        console.error("Error checking service worker registration:", err);
-      });
-    } else {
-      console.log("Service workers not supported");
-    }
+    checkServiceWorkerRegistration();
 
     return () => {
       window.removeEventListener("beforeinstallprompt", promptHandler);
     };
-  }, [toast]);
+  }, [toast, browser]);
 
   const handleInstall = async () => {
     console.log("Install button clicked, prompt:", installPrompt);
@@ -120,140 +113,37 @@ export const usePwaInstall = () => {
   };
 
   const handlePlatformSpecificInstall = () => {
-    const ua = navigator.userAgent;
-    const isIOS = /iPad|iPhone|iPod/.test(ua);
-    const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua);
-    const isAndroid = /Android/.test(ua);
-    const isFirefox = /Firefox/.test(ua);
-    const isChromeForIOS = /CriOS/.test(ua);
-    const isWindowsPhone = /Windows Phone/.test(ua);
-    const isOpera = /OPR/.test(ua) || /Opera/.test(ua);
-    const isSamsung = /SamsungBrowser/.test(ua);
-    
     // iOS Safari specific installation
-    if (isIOS && (isSafari || isChromeForIOS)) {
-      showIOSInstallInstructions();
+    if (browser.isIOS && (browser.isSafari || browser.isChromeForIOS)) {
+      showIOSInstallInstructions(toast);
     } 
     // Android specific
-    else if (isAndroid) {
-      if (isFirefox) {
-        showFirefoxInstallInstructions();
-      } else if (isOpera) {
-        showOperaInstallInstructions();
-      } else if (isSamsung) {
-        showSamsungInstallInstructions();
+    else if (browser.isAndroid) {
+      if (browser.isFirefox) {
+        showFirefoxInstallInstructions(toast);
+      } else if (browser.isOpera) {
+        showOperaInstallInstructions(toast);
+      } else if (browser.isSamsung) {
+        showSamsungInstallInstructions(toast);
       } else {
-        triggerAndroidInstallation();
+        triggerAndroidInstallation(toast);
       }
     } 
     // Windows Phone
-    else if (isWindowsPhone) {
-      showGenericInstallInstructions();
+    else if (browser.isWindowsPhone) {
+      showGenericInstallInstructions(toast);
     } 
     // Desktop browsers
-    else if (isFirefox) {
-      showFirefoxInstallInstructions();
-    } else if (isOpera) {
-      showOperaInstallInstructions();
+    else if (browser.isFirefox) {
+      showFirefoxInstallInstructions(toast);
+    } else if (browser.isOpera) {
+      showOperaInstallInstructions(toast);
     } else {
       // Generic browser instructions
-      showGenericInstallInstructions();
+      showGenericInstallInstructions(toast);
     }
     
     setInstallInProgress(false);
-  };
-  
-  // Platform specific instruction methods
-  const showIOSInstallInstructions = () => {
-    toast({
-      title: "Instalar no iOS",
-      description: "Toque no ícone de compartilhamento ⬆️ e depois em 'Adicionar à Tela de Início'",
-      duration: 6000
-    });
-    
-    // Show a visual cue
-    const shareIconElement = document.createElement('div');
-    shareIconElement.innerHTML = '⬆️';
-    shareIconElement.style.position = 'fixed';
-    shareIconElement.style.bottom = '20px';
-    shareIconElement.style.left = '50%';
-    shareIconElement.style.transform = 'translateX(-50%)';
-    shareIconElement.style.fontSize = '24px';
-    shareIconElement.style.padding = '10px';
-    shareIconElement.style.backgroundColor = 'rgba(0,0,0,0.7)';
-    shareIconElement.style.color = 'white';
-    shareIconElement.style.borderRadius = '50%';
-    shareIconElement.style.zIndex = '9999';
-    shareIconElement.style.animation = 'bounce 1s infinite';
-    
-    document.body.appendChild(shareIconElement);
-    
-    setTimeout(() => {
-      document.body.removeChild(shareIconElement);
-    }, 5000);
-  };
-  
-  const showFirefoxInstallInstructions = () => {
-    toast({
-      title: "Instalar no Firefox",
-      description: "Clique no menu ≡, depois em 'Instalar' ou 'Adicionar à Tela Inicial'",
-      duration: 6000
-    });
-  };
-  
-  const showOperaInstallInstructions = () => {
-    toast({
-      title: "Instalar no Opera",
-      description: "Clique no ícone + na barra de endereço e selecione 'Instalar'",
-      duration: 6000
-    });
-  };
-  
-  const showSamsungInstallInstructions = () => {
-    toast({
-      title: "Instalar no Samsung Internet",
-      description: "Toque no menu ⋮, depois em 'Adicionar à Tela Inicial'",
-      duration: 6000
-    });
-  };
-  
-  const showGenericInstallInstructions = () => {
-    toast({
-      title: "Instalar aplicativo",
-      description: "Use o menu do seu navegador (geralmente três pontos ⋮) e selecione 'Instalar aplicativo'",
-      duration: 6000
-    });
-  };
-  
-  const triggerAndroidInstallation = () => {
-    // Try to force the installation banner on Android
-    const manifestLink = document.querySelector('link[rel="manifest"]');
-    
-    if (manifestLink) {
-      toast({
-        title: "Instalando automaticamente",
-        description: "O aplicativo está tentando se instalar no seu dispositivo...",
-      });
-      
-      // Refresh manifest and force re-evaluation
-      const currentHref = manifestLink.getAttribute("href");
-      manifestLink.setAttribute("href", "about:blank");
-      setTimeout(() => {
-        manifestLink.setAttribute("href", currentHref || "/manifest.json");
-      }, 100);
-      
-      // Try accessing the service worker to trigger installation
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistration().then((registration) => {
-          if (registration) {
-            // Send message to service worker to trigger installation
-            registration.active?.postMessage({
-              type: 'TRIGGER_INSTALL'
-            });
-          }
-        });
-      }
-    }
   };
 
   const handleDismiss = () => {
