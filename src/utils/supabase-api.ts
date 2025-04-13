@@ -1,5 +1,5 @@
 
-// This file re-exports from the separate modules
+// This file re-exports from the separate specialized modules
 // to maintain backward compatibility
 export {
   getPages,
