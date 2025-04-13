@@ -80,14 +80,7 @@ const PageView = () => {
       <header className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-center text-gray-800">{page.title}</h1>
-          <div className="flex items-center space-x-4">
-            <Link to="/" className="text-gray-600 hover:text-gray-800">
-              <ArrowLeft size={20} />
-            </Link>
-            <Link to="/dashboard" className="text-gray-600 hover:text-gray-800">
-              <Settings size={20} />
-            </Link>
-          </div>
+          {/* Removed the icons as requested */}
         </div>
       </header>
       
