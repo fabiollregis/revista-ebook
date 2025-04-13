@@ -67,7 +67,7 @@ const Auth: React.FC = () => {
           </Link>
         </div>
         
-        <Card className="border-border/50 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="border-border/50 shadow-lg bg-white/80 backdrop-blur-sm py-0 px-[15px] my-0 mx-0">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-center">Painel Admin</CardTitle>
             <CardDescription className="text-center">Faça login</CardDescription>
