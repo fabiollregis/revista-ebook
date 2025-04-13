@@ -46,6 +46,10 @@ const UserManagement = () => {
     );
   };
 
+  const handleUserDeleted = (userId: string) => {
+    setUsers(prev => prev.filter(user => user.id !== userId));
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -68,7 +72,8 @@ const UserManagement = () => {
             {activeView === "table" ? (
               <UserTable 
                 users={users} 
-                onStatusChange={handleStatusChange} 
+                onStatusChange={handleStatusChange}
+                onUserDeleted={handleUserDeleted}
               />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
@@ -76,7 +81,8 @@ const UserManagement = () => {
                   <UserCard 
                     key={user.id} 
                     user={user} 
-                    onStatusChange={handleStatusChange} 
+                    onStatusChange={handleStatusChange}
+                    onUserDeleted={handleUserDeleted}
                   />
                 ))}
               </div>

@@ -82,3 +82,23 @@ export const createUser = async (email: string, password: string, isAdmin: boole
     return { success: false, error: error.message || "Unknown error occurred" };
   }
 };
+
+/**
+ * Delete a user
+ */
+export const deleteUser = async (userId: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    // Delete user via Supabase Admin API
+    const { error } = await supabase.auth.admin.deleteUser(userId);
+
+    if (error) {
+      console.error("Error deleting user:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to delete user:", error);
+    return { success: false, error: error.message || "Unknown error occurred" };
+  }
+};
