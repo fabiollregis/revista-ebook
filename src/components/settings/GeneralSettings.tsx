@@ -33,42 +33,7 @@ const GeneralSettings: React.FC = () => {
   };
   return <Card>
       
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="theme-select">Tema</Label>
-          <Select value={theme} onValueChange={handleThemeChange}>
-            <SelectTrigger id="theme-select" className="w-full">
-              <div className="flex items-center gap-2">
-                {getThemeIcon()}
-                <SelectValue placeholder="Selecione um tema" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="light" className="flex items-center gap-2">
-                <div className="flex items-center gap-2">
-                  <Sun className="h-4 w-4" />
-                  <span>Claro</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="dark">
-                <div className="flex items-center gap-2">
-                  <Moon className="h-4 w-4" />
-                  <span>Escuro</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="system">
-                <div className="flex items-center gap-2">
-                  <Monitor className="h-4 w-4" />
-                  <span>Sistema</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-sm text-muted-foreground mt-1">
-            Escolha entre tema claro, escuro ou siga as preferências do sistema
-          </p>
-        </div>
-      </CardContent>
+      
     </Card>;
 };
 export default GeneralSettings;
