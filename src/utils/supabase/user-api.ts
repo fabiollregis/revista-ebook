@@ -47,3 +47,39 @@ export const updateUserAdminStatus = async (userId: string, isAdmin: boolean): P
     return false;
   }
 };
+
+/**
+ * Create a new user
+ */
+export const createUser = async (email: string, password: string, isAdmin: boolean = false): Promise<{ success: boolean; error?: string; userId?: string }> => {
+  try {
+    // Create user in auth
+    const { data, error } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true
+    });
+
+    if (error) {
+      console.error("Error creating user:", error);
+      return { success: false, error: error.message };
+    }
+
+    if (data.user) {
+      // Update the user's profile with admin status if needed
+      if (isAdmin) {
+        await supabase
+          .from("profiles")
+          .update({ is_admin: true })
+          .eq("id", data.user.id);
+      }
+
+      return { success: true, userId: data.user.id };
+    }
+
+    return { success: false, error: "User created but no user data returned" };
+  } catch (error: any) {
+    console.error("Failed to create user:", error);
+    return { success: false, error: error.message || "Unknown error occurred" };
+  }
+};
