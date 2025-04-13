@@ -20,6 +20,7 @@ import PageView from "./pages/PageView";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import UserManagementPage from "./pages/UserManagementPage";
+import DesignSettings from "./pages/DesignSettings";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -56,6 +57,11 @@ const App = () => (
                   <Route path="/dashboard/pages" element={
                     <ProtectedRoute>
                       <PagesManager />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/dashboard/design" element={
+                    <ProtectedRoute>
+                      <DesignSettings />
                     </ProtectedRoute>
                   } />
                   <Route path="/dashboard/settings" element={
