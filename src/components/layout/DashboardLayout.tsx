@@ -1,11 +1,11 @@
-
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Layout, FileText, Settings, ExternalLink, Moon, Sun } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Layout, FileText, Settings, ExternalLink, Moon, Sun, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 interface DashboardLayoutProps {
@@ -14,7 +14,9 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { signOut } = useAuth();
   
   const menuItems = [
     {
@@ -51,6 +53,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
   };
 
   return (
@@ -123,14 +130,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </SidebarMenu>
           </SidebarContent>
           
-          <div className="p-4 mt-auto border-t border-border/50">
+          <div className="p-4 mt-auto border-t border-border/50 flex space-x-2">
             <Button 
               variant="outline" 
               size="icon"
               onClick={toggleTheme}
-              className="w-full flex items-center justify-center"
+              className="flex-1 flex items-center justify-center"
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={handleLogout}
+              className="flex-1 flex items-center justify-center"
+            >
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </Sidebar>
