@@ -5,11 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { SiteSettings } from "@/types/page";
 import { getSiteSettings, saveSiteSettings } from "@/utils/supabase-api";
-import InstallPromptForm from "@/components/admin/InstallPromptForm";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const Settings = () => {
@@ -17,14 +15,12 @@ const Settings = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showPwaPrompt, setShowPwaPrompt] = useState(true);
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const data = await getSiteSettings();
         setSettings(data);
-        setShowPwaPrompt(localStorage.getItem("venice-show-pwa-prompt") !== "false");
       } catch (error) {
         console.error("Error loading settings:", error);
         toast({
@@ -56,9 +52,6 @@ const Settings = () => {
     try {
       // Save to Supabase
       const success = await saveSiteSettings(settings);
-      
-      // Also update localStorage for PWA prompt setting
-      localStorage.setItem("venice-show-pwa-prompt", showPwaPrompt.toString());
       
       if (success) {
         toast({
@@ -147,43 +140,6 @@ const Settings = () => {
                 Este texto será exibido no rodapé de todas as páginas.
               </p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Configurações do PWA</CardTitle>
-            <CardDescription>
-              Personalize a experiência de instalação do aplicativo
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-2 mb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="pwa-prompt">Mostrar Prompt de Instalação PWA</Label>
-                  <p className="text-sm text-gray-500">
-                    Exibir sugestão para instalar o aplicativo em dispositivos móveis.
-                  </p>
-                </div>
-                <Switch 
-                  id="pwa-prompt" 
-                  checked={showPwaPrompt} 
-                  onCheckedChange={setShowPwaPrompt} 
-                />
-              </div>
-            </div>
-
-            {showPwaPrompt && (
-              <InstallPromptForm 
-                installPromptTitle={settings.installPromptTitle}
-                installPromptDescription={settings.installPromptDescription}
-                installButtonText={settings.installButtonText}
-                onTitleChange={(value) => handleInputChange("installPromptTitle", value)}
-                onDescriptionChange={(value) => handleInputChange("installPromptDescription", value)}
-                onButtonTextChange={(value) => handleInputChange("installButtonText", value)}
-              />
-            )}
           </CardContent>
         </Card>
 

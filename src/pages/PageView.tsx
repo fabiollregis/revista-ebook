@@ -1,11 +1,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Settings } from "lucide-react";
 import { PageData, SiteSettings } from "@/types/page";
 import { Button } from "@/components/ui/button";
 import { getSiteSettings } from "@/utils/supabase-api";
-import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import { getPageBySlug } from "@/utils/supabase-api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -80,7 +78,6 @@ const PageView = () => {
       <header className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-center text-gray-800">{page.title}</h1>
-          {/* Removed the icons as requested */}
         </div>
       </header>
       
@@ -109,9 +106,6 @@ const PageView = () => {
           &copy; {new Date().getFullYear()} {settings.siteTitle} - {settings.footerText}
         </div>
       </footer>
-
-      {/* PWA installation prompt */}
-      <PwaInstallPrompt />
     </div>
   );
 };
