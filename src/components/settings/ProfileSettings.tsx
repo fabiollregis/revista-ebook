@@ -74,9 +74,11 @@ const ProfileSettings: React.FC = () => {
       const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
       
       if (data?.publicUrl) {
+        // Atualizando o estado local primeiro para refletir imediatamente na UI
         setAvatarUrl(data.publicUrl);
         setIsImageLoading(true);
         
+        // Atualizar no banco de dados
         const { error: updateError } = await supabase
           .from("profiles")
           .update({ 
