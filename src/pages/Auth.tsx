@@ -9,26 +9,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogIn, UserPlus, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const Auth: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn, signUp, session } = useAuth();
-
+  const {
+    signIn,
+    signUp,
+    session
+  } = useAuth();
   useEffect(() => {
     if (session) {
       navigate("/dashboard");
     }
   }, [session, navigate]);
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
     try {
-      const { error } = await signIn(email, password);
+      const {
+        error
+      } = await signIn(email, password);
       if (!error) {
         navigate("/dashboard");
       }
@@ -36,13 +38,13 @@ const Auth: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
     try {
-      const { error } = await signUp(email, password);
+      const {
+        error
+      } = await signUp(email, password);
       if (!error) {
         // Keep on the same page to let user sign in after registration
       }
@@ -50,14 +52,13 @@ const Auth: React.FC = () => {
       setIsLoading(false);
     }
   };
-
-  return (
-    <motion.div 
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-accent/30 p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
+  return <motion.div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-accent/30 p-4" initial={{
+    opacity: 0
+  }} animate={{
+    opacity: 1
+  }} exit={{
+    opacity: 0
+  }}>
       <div className="w-full max-w-md">
         <div className="mb-6">
           <Link to="/" className="text-primary hover:text-primary/80 flex items-center gap-2 text-sm">
@@ -75,7 +76,7 @@ const Auth: React.FC = () => {
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Cadastro</TabsTrigger>
+              
             </TabsList>
             
             <TabsContent value="login">
@@ -83,42 +84,20 @@ const Auth: React.FC = () => {
                 <CardContent className="space-y-4 pt-6">
                   <div className="space-y-2">
                     <Label htmlFor="email">E-mail</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Senha</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
                   </div>
                 </CardContent>
                 
                 <CardFooter>
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center gap-2">Entrando...</span>
-                    ) : (
-                      <span className="flex items-center gap-2">
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? <span className="flex items-center gap-2">Entrando...</span> : <span className="flex items-center gap-2">
                         <LogIn size={18} />
                         Entrar
-                      </span>
-                    )}
+                      </span>}
                   </Button>
                 </CardFooter>
               </form>
@@ -129,42 +108,20 @@ const Auth: React.FC = () => {
                 <CardContent className="space-y-4 pt-6">
                   <div className="space-y-2">
                     <Label htmlFor="email-register">E-mail</Label>
-                    <Input
-                      id="email-register"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <Input id="email-register" type="email" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password-register">Senha</Label>
-                    <Input
-                      id="password-register"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <Input id="password-register" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
                   </div>
                 </CardContent>
                 
                 <CardFooter>
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center gap-2">Cadastrando...</span>
-                    ) : (
-                      <span className="flex items-center gap-2">
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? <span className="flex items-center gap-2">Cadastrando...</span> : <span className="flex items-center gap-2">
                         <UserPlus size={18} />
                         Cadastrar
-                      </span>
-                    )}
+                      </span>}
                   </Button>
                 </CardFooter>
               </form>
@@ -172,8 +129,6 @@ const Auth: React.FC = () => {
           </Tabs>
         </Card>
       </div>
-    </motion.div>
-  );
+    </motion.div>;
 };
-
 export default Auth;
