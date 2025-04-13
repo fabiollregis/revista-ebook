@@ -11,7 +11,9 @@ export const incrementPageView = async (id: string): Promise<boolean> => {
       page_id: string;
     }
     
-    const { error } = await supabase.rpc<null, IncrementPageViewParams>('increment_page_view_count', {
+    // The first type parameter should be the return type, not null
+    // Since we don't use the return value specifically, we can use void or any
+    const { error } = await supabase.rpc<void, IncrementPageViewParams>('increment_page_view_count', {
       page_id: id
     });
 
