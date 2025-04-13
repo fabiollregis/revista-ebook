@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+
+import React, { useEffect, useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -7,14 +8,21 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { createAdminUser } from "@/utils/create-admin-user";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { usePages } from "@/contexts/PagesContext";
+
 const Dashboard = () => {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
+  const { pages } = usePages();
+  
+  // Calculate dashboard stats
+  const totalPages = pages.length;
+  const totalViews = pages.reduce((sum, page) => sum + (page.view_count || 0), 0);
+  
   useEffect(() => {
     // Create admin user on first load
     createAdminUser();
   }, []);
+  
   const cardVariants = {
     initial: {
       y: 20,
@@ -37,6 +45,7 @@ const Dashboard = () => {
       }
     }
   };
+  
   const cards = [{
     title: "Páginas",
     description: "Gerencie o conteúdo e páginas da revista digital",
@@ -44,7 +53,7 @@ const Dashboard = () => {
     color: "from-blue-500/20 to-indigo-500/20",
     borderColor: "border-blue-200 dark:border-blue-800/30",
     path: "/dashboard/pages",
-    stats: "12 páginas"
+    stats: `${totalPages} páginas`
   }, {
     title: "Configurações",
     description: "Configure preferências gerais do aplicativo",
@@ -60,7 +69,7 @@ const Dashboard = () => {
     color: "from-green-500/20 to-teal-500/20",
     borderColor: "border-green-200 dark:border-green-800/30",
     path: "/dashboard",
-    stats: "2.457 views"
+    stats: `${totalViews} views`
   }, {
     title: "Usuários",
     description: "Gerenciar permissões e usuários do sistema",
@@ -76,7 +85,7 @@ const Dashboard = () => {
     color: "from-rose-500/20 to-red-500/20",
     borderColor: "border-rose-200 dark:border-rose-800/30",
     path: "/dashboard",
-    stats: "3 publicações"
+    stats: `${pages.slice(0, 3).length} publicações`
   }, {
     title: "Ações Rápidas",
     description: "Atalhos para tarefas frequentes",
@@ -86,6 +95,7 @@ const Dashboard = () => {
     path: "/dashboard",
     stats: "5 ações"
   }];
+
   return <DashboardLayout>
       <div className="space-y-8">
         <div>
@@ -166,4 +176,5 @@ const Dashboard = () => {
       </div>
     </DashboardLayout>;
 };
+
 export default Dashboard;
