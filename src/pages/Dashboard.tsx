@@ -103,9 +103,7 @@ const Dashboard = () => {
         }}>
             <Card className="h-full">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-md font-medium">
-                  Primary Statistics
-                </CardTitle>
+                <CardTitle className="text-md font-medium">Estatísticas</CardTitle>
                 <Button variant="ghost" size="icon">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
