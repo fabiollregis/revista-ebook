@@ -20,9 +20,10 @@ const PageForm: React.FC<PageFormProps> = ({ page, onCancel }) => {
   const navigate = useNavigate();
   
   const [title, setTitle] = useState(page?.title || "");
-  const [iframeUrl, setIframeUrl] = useState(page?.iframeUrl || "");
+  const [iframeUrl, setIframeUrl] = useState(page?.iframe_url || "");
   const [description, setDescription] = useState(page?.description || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -46,33 +47,39 @@ const PageForm: React.FC<PageFormProps> = ({ page, onCancel }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
     
-    const slug = page?.slug || generateSlug(title);
+    setIsSubmitting(true);
     
-    if (page) {
-      // Atualizar página existente
-      updatePage(page.id, {
-        title,
-        iframeUrl,
-        description,
-      });
-    } else {
-      // Criar nova página
-      addPage({
-        title,
-        slug,
-        iframeUrl,
-        description,
-      });
+    try {
+      if (page) {
+        // Atualizar página existente
+        await updatePage(page.id, {
+          title,
+          iframe_url: iframeUrl,
+          description,
+        });
+      } else {
+        // Criar nova página
+        await addPage({
+          title,
+          slug: generateSlug(title),
+          iframe_url: iframeUrl,
+          description,
+        });
+      }
+      
+      // Redirecionar para a listagem
+      navigate("/dashboard");
+      onCancel();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    // Redirecionar para a listagem
-    navigate("/dashboard");
-    onCancel();
   };
 
   return (
@@ -92,6 +99,7 @@ const PageForm: React.FC<PageFormProps> = ({ page, onCancel }) => {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Digite o título da página"
           className={errors.title ? "border-red-500" : ""}
+          disabled={isSubmitting}
         />
         {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
       </div>
@@ -104,6 +112,7 @@ const PageForm: React.FC<PageFormProps> = ({ page, onCancel }) => {
           onChange={(e) => setIframeUrl(e.target.value)}
           placeholder="https://exemplo.com/embed"
           className={errors.iframeUrl ? "border-red-500" : ""}
+          disabled={isSubmitting}
         />
         {errors.iframeUrl && <p className="text-red-500 text-sm">{errors.iframeUrl}</p>}
       </div>
@@ -116,15 +125,16 @@ const PageForm: React.FC<PageFormProps> = ({ page, onCancel }) => {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Descreva esta página"
           className="min-h-24"
+          disabled={isSubmitting}
         />
       </div>
       
       <div className="flex justify-end space-x-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancelar
         </Button>
-        <Button type="submit">
-          {page ? "Atualizar" : "Criar"} Página
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Processando..." : page ? "Atualizar" : "Criar"} Página
         </Button>
       </div>
     </form>

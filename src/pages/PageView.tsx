@@ -2,36 +2,64 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Settings } from "lucide-react";
-import { PageData } from "@/types/page";
-import { getPageBySlug } from "@/utils/local-storage";
+import { PageData, SiteSettings } from "@/types/page";
 import { Button } from "@/components/ui/button";
-import { loadSiteConfig } from "@/utils/pwa-config";
+import { getSiteSettings } from "@/utils/supabase-api";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
+import { getPageBySlug } from "@/utils/supabase-api";
+import { useToast } from "@/hooks/use-toast";
 
 const PageView = () => {
   const { slug } = useParams<{ slug: string }>();
   const [page, setPage] = useState<PageData | null>(null);
-  const [siteTitle, setSiteTitle] = useState("");
-  const [footerText, setFooterText] = useState("");
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (slug) {
-      const foundPage = getPageBySlug(slug);
-      setPage(foundPage || null);
-      
-      if (foundPage) {
-        // Update the page title
-        document.title = `${foundPage.title} | Venice Guide`;
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch site settings
+        const siteSettings = await getSiteSettings();
+        setSettings(siteSettings);
+        
+        // Fetch page data if slug exists
+        if (slug) {
+          const pageData = await getPageBySlug(slug);
+          setPage(pageData);
+          
+          if (pageData) {
+            // Update the page title
+            document.title = `${pageData.title} | ${siteSettings.siteTitle}`;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Não foi possível carregar os dados da página.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
       }
-    }
+    };
     
-    // Load site configuration
-    const config = loadSiteConfig();
-    setSiteTitle(config.siteTitle);
-    setFooterText(config.footerText);
-  }, [slug]);
+    fetchData();
+  }, [slug, toast]);
 
-  if (!page) {
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center p-6">
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!page || !settings) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-white">
         <div className="text-center p-6">
@@ -69,7 +97,7 @@ const PageView = () => {
             allowFullScreen 
             scrolling="no" 
             className="w-full h-full" 
-            src={page.iframeUrl}
+            src={page.iframe_url}
             title={page.title}
           ></iframe>
         </div>
@@ -85,7 +113,7 @@ const PageView = () => {
       
       <footer className="bg-white py-4">
         <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} {siteTitle} - {footerText}
+          &copy; {new Date().getFullYear()} {settings.siteTitle} - {settings.footerText}
         </div>
       </footer>
 

@@ -4,17 +4,15 @@ import { Link } from "react-router-dom";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PwaInstallPrompt from "../components/PwaInstallPrompt";
-import { getPages } from "@/utils/local-storage";
-import { PageData } from "@/types/page";
+import { PageData, SiteSettings } from "@/types/page";
 import { useToast } from "@/hooks/use-toast";
+import { usePages } from "@/contexts/PagesContext";
+import { getSiteSettings } from "@/utils/supabase-api";
 
 const Index = () => {
-  const [pages, setPages] = useState<PageData[]>([]);
-  const [iframeUrl, setIframeUrl] = useState("https://heyzine.com/flip-book/dce36e099f.html");
-  const [iframeTitle, setIframeTitle] = useState("Venice Guide - Interactive Flipbook");
-  const [siteTitle, setSiteTitle] = useState("Venice Guide");
-  const [footerText, setFooterText] = useState("Conteúdo interativo");
-  const [infoText, setInfoText] = useState("Guia interativo de Veneza - Instale como aplicativo para acesso offline");
+  const { pages, loading } = usePages();
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -92,28 +90,41 @@ const Index = () => {
       console.log("Service workers not supported in this browser");
     }
 
-    // Carrega as páginas do localStorage
-    setPages(getPages());
+    // Load site settings
+    const loadSettings = async () => {
+      try {
+        const siteSettings = await getSiteSettings();
+        setSettings(siteSettings);
+      } catch (error) {
+        console.error('Error loading settings:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar configurações",
+          description: "Não foi possível carregar as configurações do site."
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    // Carrega os valores do localStorage, se existirem
-    const savedUrl = localStorage.getItem("venice-iframe-url");
-    const savedTitle = localStorage.getItem("venice-iframe-title");
-    const savedSiteTitle = localStorage.getItem("venice-site-title");
-    const savedFooterText = localStorage.getItem("venice-footer-text");
-    const savedInfoText = localStorage.getItem("venice-info-text");
-    
-    if (savedUrl) setIframeUrl(savedUrl);
-    if (savedTitle) setIframeTitle(savedTitle);
-    if (savedSiteTitle) setSiteTitle(savedSiteTitle);
-    if (savedFooterText) setFooterText(savedFooterText);
-    if (savedInfoText) setInfoText(savedInfoText);
+    loadSettings();
   }, [toast]);
+
+  if (isLoading || !settings) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header className="bg-white shadow-sm py-4">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-center text-gray-800">{siteTitle}</h1>
+          <h1 className="text-2xl font-semibold text-center text-gray-800">{settings.siteTitle}</h1>
           <Link to="/dashboard" className="text-gray-600 hover:text-gray-800">
             <Settings size={20} />
           </Link>
@@ -121,7 +132,7 @@ const Index = () => {
       </header>
       
       <main className="flex-grow flex flex-col items-center p-4">
-        {pages.length > 0 ? (
+        {!loading && pages.length > 0 ? (
           <div className="container mx-auto px-4 py-8">
             <h2 className="text-xl font-semibold mb-6">Páginas Disponíveis</h2>
             
@@ -157,14 +168,14 @@ const Index = () => {
                 allowFullScreen 
                 scrolling="no" 
                 className="w-full h-full" 
-                src={iframeUrl}
-                title={iframeTitle}
+                src={settings.iframeUrl || "https://heyzine.com/flip-book/dce36e099f.html"}
+                title={settings.iframeTitle}
               ></iframe>
             </div>
             
             <div className="mt-6 text-center">
               <p className="text-gray-600 text-sm mb-4">
-                {infoText}
+                {settings.infoText}
               </p>
               
               <Link to="/dashboard">
@@ -179,7 +190,7 @@ const Index = () => {
       
       <footer className="bg-white py-4">
         <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} {siteTitle} - {footerText}
+          &copy; {new Date().getFullYear()} {settings.siteTitle} - {settings.footerText}
         </div>
       </footer>
 

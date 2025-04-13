@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,29 +7,101 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { SiteSettings } from "@/types/page";
+import { getSiteSettings, updateSiteSettings } from "@/utils/supabase-api";
 
 const Settings = () => {
   const { toast } = useToast();
-  const [siteTitle, setSiteTitle] = useState(
-    localStorage.getItem("venice-site-title") || "Venice Guide"
-  );
-  const [footerText, setFooterText] = useState(
-    localStorage.getItem("venice-footer-text") || "Conteúdo interativo"
-  );
-  const [showPwaPrompt, setShowPwaPrompt] = useState(
-    localStorage.getItem("venice-show-pwa-prompt") !== "false"
-  );
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [showPwaPrompt, setShowPwaPrompt] = useState(true);
 
-  const saveSettings = () => {
-    localStorage.setItem("venice-site-title", siteTitle);
-    localStorage.setItem("venice-footer-text", footerText);
-    localStorage.setItem("venice-show-pwa-prompt", showPwaPrompt.toString());
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const data = await getSiteSettings();
+        setSettings(data);
+        setShowPwaPrompt(localStorage.getItem("venice-show-pwa-prompt") !== "false");
+      } catch (error) {
+        console.error("Error loading settings:", error);
+        toast({
+          title: "Erro ao carregar configurações",
+          description: "Não foi possível carregar as configurações do site.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    toast({
-      title: "Configurações salvas",
-      description: "As alterações foram aplicadas com sucesso.",
-    });
+    loadSettings();
+  }, [toast]);
+
+  const handleInputChange = (field: keyof SiteSettings, value: string) => {
+    if (settings) {
+      setSettings({
+        ...settings,
+        [field]: value
+      });
+    }
   };
+
+  const saveSettings = async () => {
+    if (!settings) return;
+    
+    setSaving(true);
+    try {
+      // Save to Supabase
+      const success = await updateSiteSettings(settings);
+      
+      // Also update localStorage for PWA prompt setting
+      localStorage.setItem("venice-show-pwa-prompt", showPwaPrompt.toString());
+      
+      if (success) {
+        toast({
+          title: "Configurações salvas",
+          description: "As alterações foram aplicadas com sucesso.",
+        });
+      } else {
+        throw new Error("Failed to save settings");
+      }
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      toast({
+        title: "Erro ao salvar configurações",
+        description: "Não foi possível salvar as configurações. Tente novamente mais tarde.",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center h-64">
+          <p className="text-gray-500">Carregando configurações...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!settings) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-medium">Configurações do Site</h3>
+            <p className="text-sm text-red-500">
+              Erro ao carregar configurações. Por favor, recarregue a página.
+            </p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -47,8 +119,8 @@ const Settings = () => {
             <Label htmlFor="site-title">Título do Site</Label>
             <Input
               id="site-title"
-              value={siteTitle}
-              onChange={(e) => setSiteTitle(e.target.value)}
+              value={settings.siteTitle}
+              onChange={(e) => handleInputChange("siteTitle", e.target.value)}
             />
             <p className="text-sm text-gray-500">
               Este título será exibido na barra de título do navegador e no cabeçalho do site.
@@ -59,8 +131,8 @@ const Settings = () => {
             <Label htmlFor="footer-text">Texto do Rodapé</Label>
             <Input
               id="footer-text"
-              value={footerText}
-              onChange={(e) => setFooterText(e.target.value)}
+              value={settings.footerText}
+              onChange={(e) => handleInputChange("footerText", e.target.value)}
             />
             <p className="text-sm text-gray-500">
               Este texto será exibido no rodapé de todas as páginas.
@@ -85,7 +157,9 @@ const Settings = () => {
         </div>
 
         <div className="flex justify-end">
-          <Button onClick={saveSettings}>Salvar Configurações</Button>
+          <Button onClick={saveSettings} disabled={saving}>
+            {saving ? "Salvando..." : "Salvar Configurações"}
+          </Button>
         </div>
       </div>
     </DashboardLayout>
