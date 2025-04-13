@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { SiteSettings } from "@/types/page";
-import { getSiteSettings, updateSiteSettings } from "@/utils/supabase-api";
+import { getSiteSettings, saveSiteSettings } from "@/utils/supabase-api";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -53,7 +53,7 @@ const Settings = () => {
     setSaving(true);
     try {
       // Save to Supabase
-      const success = await updateSiteSettings(settings);
+      const success = await saveSiteSettings(settings);
       
       // Also update localStorage for PWA prompt setting
       localStorage.setItem("venice-show-pwa-prompt", showPwaPrompt.toString());
