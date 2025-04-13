@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import PasswordModal from "@/components/PasswordModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index: React.FC = () => {
   const { toast } = useToast();
+  const { user, isAdmin } = useAuth();
   const [iframeUrl, setIframeUrl] = useState("");
   const [iframeTitle, setIframeTitle] = useState("");
   const [infoText, setInfoText] = useState("");
@@ -57,6 +59,19 @@ const Index: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-800">Venice Guide</h1>
           </div>
           <div className="flex items-center gap-4">
+            {user ? (
+              <Link to="/dashboard">
+                <Button variant="outline" size="sm" className="rounded-full">
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="rounded-full">
+                  Login
+                </Button>
+              </Link>
+            )}
             <Button 
               variant="ghost" 
               size="icon"

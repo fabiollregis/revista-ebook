@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { PagesProvider } from "@/contexts/PagesContext";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Páginas
 import Index from "./pages/Index";
@@ -15,36 +17,56 @@ import PagesManager from "./pages/PagesManager";
 import Settings from "./pages/Settings";
 import PageView from "./pages/PageView";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="light">
-      <BrowserRouter>
-        <PagesProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              {/* Páginas públicas */}
-              <Route path="/" element={<Index />} />
-              <Route path="/page/:slug" element={<PageView />} />
-              
-              {/* Páginas do dashboard */}
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dashboard/pages" element={<PagesManager />} />
-              <Route path="/dashboard/settings" element={<Settings />} />
-              
-              {/* Rota de admin legado - redireciona para o dashboard */}
-              <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
-              
-              {/* Página 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TooltipProvider>
-        </PagesProvider>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <PagesProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                {/* Páginas públicas */}
+                <Route path="/" element={<Index />} />
+                <Route path="/page/:slug" element={<PageView />} />
+                <Route path="/auth" element={<Auth />} />
+                
+                {/* Páginas do dashboard - protegidas */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/pages" element={
+                  <ProtectedRoute>
+                    <PagesManager />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Rota de admin legado - redireciona para o dashboard */}
+                <Route path="/admin" element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <Admin />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Página 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
+          </PagesProvider>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
