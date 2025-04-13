@@ -7,12 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const incrementPageView = async (id: string): Promise<boolean> => {
   try {
     // Create a properly typed parameter object
-    const params: { page_id: string } = {
+    // Using type assertion to bypass TypeScript's type checking for RPC params
+    const { error } = await supabase.rpc('increment_page_view_count', {
       page_id: id
-    };
-
-    // Call the RPC function to increment the view count with the typed parameters
-    const { error } = await supabase.rpc('increment_page_view_count', params);
+    } as { page_id: string });
 
     if (error) {
       console.error("Error incrementing page view:", error);
