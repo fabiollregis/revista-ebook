@@ -8,6 +8,32 @@ import ContentSettingsForm from "@/components/admin/ContentSettingsForm";
 import InstallPromptForm from "@/components/admin/InstallPromptForm";
 import SaveButton from "@/components/admin/SaveButton";
 import PasswordProtection from "@/components/admin/PasswordProtection";
+import { useAdmin } from "@/contexts/AdminContext";
+
+const AdminContent = () => {
+  const { 
+    installPromptTitle, setInstallPromptTitle,
+    installPromptDescription, setInstallPromptDescription,
+    installButtonText, setInstallButtonText
+  } = useAdmin();
+
+  return (
+    <div className="space-y-6">
+      <SiteSettingsForm />
+      <IframeSettingsForm />
+      <ContentSettingsForm />
+      <InstallPromptForm 
+        installPromptTitle={installPromptTitle}
+        installPromptDescription={installPromptDescription}
+        installButtonText={installButtonText}
+        onTitleChange={setInstallPromptTitle}
+        onDescriptionChange={setInstallPromptDescription}
+        onButtonTextChange={setInstallButtonText}
+      />
+      <SaveButton />
+    </div>
+  );
+};
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,13 +50,7 @@ const Admin = () => {
   return (
     <AdminProvider>
       <AdminLayout>
-        <div className="space-y-6">
-          <SiteSettingsForm />
-          <IframeSettingsForm />
-          <ContentSettingsForm />
-          <InstallPromptForm />
-          <SaveButton />
-        </div>
+        <AdminContent />
       </AdminLayout>
     </AdminProvider>
   );
