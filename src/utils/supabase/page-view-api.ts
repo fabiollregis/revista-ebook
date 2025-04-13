@@ -8,8 +8,8 @@ export const incrementPageView = async (id: string): Promise<boolean> => {
   try {
     // Call the RPC function to increment the view count
     const { error } = await supabase.rpc('increment_page_view_count', {
-      page_id: id 
-    } as { page_id: string });
+      page_id: id
+    });
 
     if (error) {
       console.error("Error incrementing page view:", error);
