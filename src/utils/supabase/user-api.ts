@@ -53,11 +53,10 @@ export const updateUserAdminStatus = async (userId: string, isAdmin: boolean): P
  */
 export const createUser = async (email: string, password: string, isAdmin: boolean = false): Promise<{ success: boolean; error?: string; userId?: string }> => {
   try {
-    // Create user in auth
-    const { data, error } = await supabase.auth.admin.createUser({
+    // Sign up the user using the regular sign-up endpoint
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: true
     });
 
     if (error) {
