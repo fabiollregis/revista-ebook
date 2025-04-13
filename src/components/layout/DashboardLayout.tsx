@@ -1,6 +1,7 @@
+
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Layout, FileText, Settings, ExternalLink, Moon, Sun, LogOut } from "lucide-react";
+import { Layout, FileText, Settings, ExternalLink, Moon, Sun, LogOut, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
@@ -30,7 +31,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       path: "/dashboard/pages",
       icon: FileText,
       description: "Gerenciar conteúdo"
-    }, 
+    },
+    {
+      title: "Usuários",
+      path: "/dashboard/users",
+      icon: Users,
+      description: "Gerenciar usuários"
+    },
     {
       title: "Configurações",
       path: "/dashboard/settings",
