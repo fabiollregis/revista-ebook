@@ -9,6 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { SiteSettings } from "@/types/page";
 import { getSiteSettings, saveSiteSettings } from "@/utils/supabase-api";
+import InstallPromptForm from "@/components/admin/InstallPromptForm";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -105,7 +107,7 @@ const Settings = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
           <h3 className="text-lg font-medium">Configurações do Site</h3>
           <p className="text-sm text-gray-500">
@@ -114,47 +116,76 @@ const Settings = () => {
         </div>
         <Separator />
 
-        <div className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="site-title">Título do Site</Label>
-            <Input
-              id="site-title"
-              value={settings.siteTitle}
-              onChange={(e) => handleInputChange("siteTitle", e.target.value)}
-            />
-            <p className="text-sm text-gray-500">
-              Este título será exibido na barra de título do navegador e no cabeçalho do site.
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="footer-text">Texto do Rodapé</Label>
-            <Input
-              id="footer-text"
-              value={settings.footerText}
-              onChange={(e) => handleInputChange("footerText", e.target.value)}
-            />
-            <p className="text-sm text-gray-500">
-              Este texto será exibido no rodapé de todas as páginas.
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="pwa-prompt">Mostrar Prompt de Instalação PWA</Label>
-                <p className="text-sm text-gray-500">
-                  Exibir sugestão para instalar o aplicativo em dispositivos móveis.
-                </p>
-              </div>
-              <Switch 
-                id="pwa-prompt" 
-                checked={showPwaPrompt} 
-                onCheckedChange={setShowPwaPrompt} 
+        <Card>
+          <CardHeader>
+            <CardTitle>Configurações Gerais</CardTitle>
+            <CardDescription>
+              Informações básicas do seu site
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="site-title">Título do Site</Label>
+              <Input
+                id="site-title"
+                value={settings.siteTitle}
+                onChange={(e) => handleInputChange("siteTitle", e.target.value)}
               />
+              <p className="text-sm text-gray-500">
+                Este título será exibido na barra de título do navegador e no cabeçalho do site.
+              </p>
             </div>
-          </div>
-        </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="footer-text">Texto do Rodapé</Label>
+              <Input
+                id="footer-text"
+                value={settings.footerText}
+                onChange={(e) => handleInputChange("footerText", e.target.value)}
+              />
+              <p className="text-sm text-gray-500">
+                Este texto será exibido no rodapé de todas as páginas.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Configurações do PWA</CardTitle>
+            <CardDescription>
+              Personalize a experiência de instalação do aplicativo
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2 mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="pwa-prompt">Mostrar Prompt de Instalação PWA</Label>
+                  <p className="text-sm text-gray-500">
+                    Exibir sugestão para instalar o aplicativo em dispositivos móveis.
+                  </p>
+                </div>
+                <Switch 
+                  id="pwa-prompt" 
+                  checked={showPwaPrompt} 
+                  onCheckedChange={setShowPwaPrompt} 
+                />
+              </div>
+            </div>
+
+            {showPwaPrompt && (
+              <InstallPromptForm 
+                installPromptTitle={settings.installPromptTitle}
+                installPromptDescription={settings.installPromptDescription}
+                installButtonText={settings.installButtonText}
+                onTitleChange={(value) => handleInputChange("installPromptTitle", value)}
+                onDescriptionChange={(value) => handleInputChange("installPromptDescription", value)}
+                onButtonTextChange={(value) => handleInputChange("installButtonText", value)}
+              />
+            )}
+          </CardContent>
+        </Card>
 
         <div className="flex justify-end">
           <Button onClick={saveSettings} disabled={saving}>
