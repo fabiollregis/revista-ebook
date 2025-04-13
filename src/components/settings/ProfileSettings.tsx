@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,75 +18,37 @@ const ProfileSettings: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(!!avatarUrl);
 
-  const updateProfile = async () => {
-    if (!user) return;
-    
-    setIsUpdating(true);
-    
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          username,
-          full_name: fullName,
-          avatar_url: avatarUrl,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Perfil atualizado",
-        description: "Suas informações foram atualizadas com sucesso",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro ao atualizar",
-        description: error.message || "Ocorreu um erro ao atualizar seu perfil",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!user || !event.target.files || event.target.files.length === 0) return;
     
     const file = event.target.files[0];
     const fileExt = file.name.split(".").pop();
-    const filePath = `${user.id}-${Math.random()}.${fileExt}`;
+    const fileName = `${user.id}/${Math.random()}.${fileExt}`;
     
     setIsUpdating(true);
     
     try {
-      // Check if the avatars bucket exists, if not create it
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const avatarsBucketExists = buckets?.some(b => b.name === 'avatars');
-      
-      if (!avatarsBucketExists) {
-        await supabase.storage.createBucket('avatars', {
-          public: true
-        });
-      }
-      
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
       
       if (uploadError) throw uploadError;
       
-      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
       
       if (data?.publicUrl) {
         setAvatarUrl(data.publicUrl);
         setIsImageLoading(true);
         
-        // Update profile with new avatar URL
         const { error: updateError } = await supabase
           .from("profiles")
-          .update({ avatar_url: data.publicUrl })
+          .update({ 
+            avatar_url: data.publicUrl,
+            updated_at: new Date().toISOString()
+          })
           .eq("id", user.id);
         
         if (updateError) throw updateError;
