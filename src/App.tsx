@@ -8,13 +8,14 @@ import { PagesProvider } from "@/contexts/PagesContext";
 import { ThemeProvider } from "@/hooks/use-theme";
 
 // Páginas
-import Index from "./pages/Index";
+import LoginPage from "./pages/LoginPage";
 import Admin from "./pages/Admin";
 import Dashboard from "./pages/Dashboard";
 import PagesManager from "./pages/PagesManager";
 import Settings from "./pages/Settings";
 import PageView from "./pages/PageView";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -27,8 +28,13 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Routes>
+              {/* Página de login como página inicial */}
+              <Route path="/" element={<LoginPage />} />
+              
+              {/* Rota antiga para a página inicial - opcional */}
+              <Route path="/home" element={<Index />} />
+              
               {/* Páginas públicas */}
-              <Route path="/" element={<Index />} />
               <Route path="/page/:slug" element={<PageView />} />
               
               {/* Páginas do dashboard */}
