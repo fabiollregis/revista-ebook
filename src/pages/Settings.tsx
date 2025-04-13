@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,21 +9,14 @@ import NotificationSettings from "@/components/settings/NotificationSettings";
 import GeneralSettings from "@/components/settings/GeneralSettings";
 import DangerZone from "@/components/settings/DangerZone";
 import { User, Key, Bell, Settings as SettingsIcon, AlertTriangle } from "lucide-react";
-
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
-
-  return (
-    <DashboardLayout>
+  return <DashboardLayout>
       <PageTransition>
         <div className="container mx-auto py-6">
           <h1 className="text-3xl font-bold mb-6">Configurações</h1>
           
-          <Tabs 
-            defaultValue={activeTab} 
-            onValueChange={setActiveTab}
-            className="max-w-4xl mx-auto"
-          >
+          <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="max-w-4xl mx-auto">
             <div className="mb-6 overflow-auto">
               <ScrollArea className="w-full whitespace-nowrap pb-2">
                 <TabsList className="inline-flex h-10">
@@ -40,10 +32,7 @@ const Settings = () => {
                     <Bell size={16} />
                     <span>Notificações</span>
                   </TabsTrigger>
-                  <TabsTrigger value="general" className="flex items-center gap-2">
-                    <SettingsIcon size={16} />
-                    <span>Geral</span>
-                  </TabsTrigger>
+                  
                   <TabsTrigger value="danger" className="flex items-center gap-2 text-destructive">
                     <AlertTriangle size={16} />
                     <span>Perigo</span>
@@ -76,8 +65,6 @@ const Settings = () => {
           </Tabs>
         </div>
       </PageTransition>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default Settings;
